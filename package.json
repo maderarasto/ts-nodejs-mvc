@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "npx ts-node src/app.ts",
     "lint": "eslint . --fix"
   },
   "keywords": [],
