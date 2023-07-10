@@ -2,6 +2,8 @@ import express, { Request, Response } from 'express';
 
 import DB from './database/DB';
 import config from './config';
+import Model from './models/Model';
+import User from './models/User';
 
 const app = express();
 
@@ -14,4 +16,6 @@ app.listen(config.port, async () => {
     console.log(`App is listening on port ${config.port}...`);
 
     DB.init();    
+
+    console.log(await User.find(1));
 });

@@ -8,13 +8,7 @@ export type DatabaseCredentials = {
     database: string
 }
 
-export type DatabaseResult = (
-    mysql.OkPacket | 
-    mysql.RowDataPacket[] |
-     mysql.RowDataPacket[][] | 
-     mysql.OkPacket[] | 
-     mysql.ProcedureCallPacket
-);
+export type RawData = mysql.RowDataPacket;
 
 type DatabaseParameter = (string | number | boolean);
 
@@ -54,7 +48,7 @@ export default class DB {
         const connection: Connection = await DB.instance.connect();
         
         return new Promise((resolve, reject) => {
-            connection.execute(sql, values, (err, result: DatabaseResult) => {
+            connection.execute(sql, values, (err, result) => {
                 if (err) {
                     reject(err);
                 } else {
