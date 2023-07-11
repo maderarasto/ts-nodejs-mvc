@@ -1,8 +1,5 @@
 # Ignore node modules
 node_modules/
 
-# Ignore generated dist
-dist/
-
 # Ignore vscode profile directory
 .vscode/
