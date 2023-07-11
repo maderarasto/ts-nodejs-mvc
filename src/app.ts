@@ -17,5 +17,6 @@ app.listen(config.port, async () => {
 
     DB.init();    
 
-    console.log(await User.find(1));
+    await Model.find(1);
+    await User.find(1);
 });
