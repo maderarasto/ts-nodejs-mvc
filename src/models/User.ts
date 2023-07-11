@@ -1,29 +1,26 @@
-import { log } from "console";
-import DbEntity from "../database/DbEntity";
 import Model, { ModelAttributes } from "./Model"
 
-@DbEntity.useTable('users')
-export default class User extends Model {
+interface UserPros {
+    first_name?: string;
+}
 
-    // @DbEntity.column
-    // public firstName: string;
+export default class User extends Model implements UserPros {
 
-    // @DbEntity.column
-    // public lastName: string;
+    @Model.propertyOf('User')
+    first_name?: string | undefined;
 
-    // @DbEntity.column
-    // public login: string;
-
-    // @DbEntity.column
-    // public password: string;
-
-    @DbEntity.column
-    public email?: string;
-
-    @DbEntity.column
-    public phone?: string;
+    protected static fillable = [
+        'first_name',
+        'last_name',
+        'login',
+        'password',
+        'email',
+        'phone'
+    ];
 
     constructor(data: ModelAttributes) {
         super(data);
+        console.log(this.attributes);
+        
     }
 }

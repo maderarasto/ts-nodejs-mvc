@@ -17,6 +17,8 @@ app.listen(config.port, async () => {
 
     DB.init();    
 
-    await Model.find(1);
-    await User.find(1);
-});
+    const u = new User({
+        first_name: 'Rastislav',
+        last_name: 'Madera',
+    });
+});    
