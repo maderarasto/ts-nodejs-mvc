@@ -104,6 +104,34 @@ export default class Model extends Object {
         return this.instantiate(found);
     }
 
+    public static async findMany(ids: number[]): Promise<Model[]> {
+        // if (this.name === Model.name) {
+        //     throw new Error('A base model class cannot be querable!');
+        // }
+
+        let result: RawData[] = [];
+
+        try {
+            result = await DB.execute(`
+                SELECT * FROM ${this.getTableName()}
+                WHERE id IN (${ids.join(',')})
+            `) as RawData[];
+        } catch (err) {
+            console.log(err);
+        }
+
+        if (!result || result.length === 0) {
+            return [];
+        }
+
+        const models: Model[] = [];
+        result.forEach(rowData => {
+            models.push(this.instantiate(rowData));
+        });
+
+        return models;
+    }
+
     protected static getTableName() {
         if (Model.tableName !== '') return Model.tableName;
 

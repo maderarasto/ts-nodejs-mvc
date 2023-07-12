@@ -33,6 +33,4 @@ const config: AppConfig = {
     }
 }
 
-console.log(config);
-
 export default config;
