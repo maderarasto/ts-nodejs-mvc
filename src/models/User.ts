@@ -1,15 +1,8 @@
-import Model, { ModelAttributes } from "./Model"
+import Model, { AttributeValue, ModelAttributes } from "./Model"
 
-interface UserPros {
-    first_name?: string;
-}
-
-export default class User extends Model implements UserPros {
-
-    @Model.propertyOf('User')
-    first_name?: string | undefined;
-
-    protected static fillable = [
+export default class User extends Model {
+    
+    protected static fillable: string[] = [
         'first_name',
         'last_name',
         'login',
@@ -18,9 +11,15 @@ export default class User extends Model implements UserPros {
         'phone'
     ];
 
-    constructor(data: ModelAttributes) {
-        super(data);
-        console.log(this.attributes);
-        
-    }
+    @Model.property()
+    public first_name?: string;
+
+    @Model.property()
+    public last_name?: string;
+
+    @Model.property()
+    public login?: string;
+
+    @Model.property()
+    public password?: string;
 }

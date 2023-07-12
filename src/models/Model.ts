@@ -1,4 +1,5 @@
 import DB, { RawData } from "../database/DB";
+import crypto from 'crypto';
 
 export type AttributeValue = boolean | number | string;
 export type ModelAttributes = {
@@ -15,26 +16,27 @@ export default class Model extends Object {
     protected static tableName: string = '';
     protected static fillable: string[] = [];
     protected static hidden: string[] = [];
-    
-    private static propertiesPerModel: ModelProperties = {
-        model: [ Model.PRIMARY_KEY ],
-        installation: [ 'name' ]
-    };
 
     protected attributes: ModelAttributes = {};
 
     public id?: number;
 
-    constructor(data: ModelAttributes = {}) {
-        super();    
+    constructor() {
+        super();
         
-        this.initializeProperties();
-        this.fill(data);
+        Object.defineProperty(this, 'id', {
+            get: function () {
+                return this.attributes['id'];
+            },
+            set: function (value: number) {
+                this.attributes['id'] = value;
+            }
+        })
     }
 
     public setAttribute(key: string, value: AttributeValue) {
         const propertyDesc = Object.getOwnPropertyDescriptor(this, key);
-        
+
         if (propertyDesc && propertyDesc.set) {
             propertyDesc.set.call(this, value);
         }
@@ -42,7 +44,7 @@ export default class Model extends Object {
 
     public fill(data: ModelAttributes) {
         const fillableFields = this.getFillableFields();
-
+        
         Object.entries(data).forEach(([key, value]) => {
             if (fillableFields.includes(key)) {
                 this.setAttribute(key, value);
@@ -50,33 +52,8 @@ export default class Model extends Object {
         });
     }
 
-    private getClassName() {
+    public getClassName() {
         return Object.getPrototypeOf(this).constructor.name;
-    }
-
-    private initializeProperties() {
-        const validModels = [ 
-            Model.name.toLowerCase(), 
-            this.getClassName().toLowerCase()
-        ];
-        
-        let propertyKeys: string[] = [];    
-        for (let [modelName, modelPropKeys] of Object.entries(Model.propertiesPerModel)) {
-            if (validModels.includes(modelName)) {
-                propertyKeys.push(...modelPropKeys);
-            }
-        }            
-        
-        propertyKeys.forEach(propertyKey => {
-            Object.defineProperty(this, propertyKey, {
-                get: function () {
-                    this.attributes[propertyKey]
-                },
-                set: function (value) {
-                    this.attributes[propertyKey] = value;
-                }
-            });
-        });
     }
 
     private getFillableFields(): string[] {
@@ -114,18 +91,26 @@ export default class Model extends Object {
         return model;
     }
 
-    public static propertyOf(clsName: string) {
-        return function (_: any, {kind, name}: ClassFieldDecoratorContext) {
+    protected static property(hashable: boolean=false) {
+        return function (_: any, {kind, name, addInitializer}: ClassFieldDecoratorContext) {
             if (kind !== 'field') return;
+    
+            addInitializer(function () {
+                Object.defineProperty(this, name, {
+                    get: function () {
+                        return this.attributes[name];
+                    },
+                    set: function (value: AttributeValue) {
+                        if (!value) return value;
 
-            const clsNameKey = clsName.toLowerCase();
-            const fieldName = name as string;
+                        if (hashable) {
+                            value = crypto.createHash('md5').update(value as string).digest('hex');
+                        }
 
-            if (!Model.propertiesPerModel.hasOwnProperty(clsNameKey)) {
-                Model.propertiesPerModel[clsNameKey] = [];
-            }
-            
-            Model.propertiesPerModel[clsNameKey].push(fieldName);
+                        this.attributes[name] = value;
+                    }
+                })
+            });
         }
     }
 }

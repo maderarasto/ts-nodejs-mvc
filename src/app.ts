@@ -2,7 +2,6 @@ import express, { Request, Response } from 'express';
 
 import DB from './database/DB';
 import config from './config';
-import Model from './models/Model';
 import User from './models/User';
 
 const app = express();
@@ -17,8 +16,16 @@ app.listen(config.port, async () => {
 
     DB.init();    
 
-    const u = new User({
+    const u = new User();
+    u.fill({
         first_name: 'Rastislav',
         last_name: 'Madera',
+        login: 'rmadera',
+        password: 'abcdef'
     });
+
+    console.log(u.password);
+
+    u.password = '12345';
+    console.log(u.password)
 });    
