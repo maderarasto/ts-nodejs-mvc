@@ -1,5 +1,8 @@
 import Model, { useField } from "./Model"
 
+/**
+ * Represents a user in system.
+ */
 export default class User extends Model {
     
     protected static fillable: string[] = [
