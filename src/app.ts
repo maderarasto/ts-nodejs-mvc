@@ -12,6 +12,6 @@ app.listen(config.port, async () => {
     console.log(`App is listening on port ${config.port}...`);
     
     DB.init();  
-    const u = await User.findMany([1,3]);
+    const u = await User.get();
     console.log(u);
 });    
