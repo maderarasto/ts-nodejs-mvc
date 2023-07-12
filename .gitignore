@@ -3,3 +3,6 @@ node_modules/
 
 # Ignore vscode profile directory
 .vscode/
+
+# Ignore 
+.env
