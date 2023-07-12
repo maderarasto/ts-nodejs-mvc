@@ -69,7 +69,7 @@ export default class Model extends Object {
         });
     }
 
-    public getClassName() {
+    public getClassName(): string {
         return Object.getPrototypeOf(this).constructor.name;
     }
 
@@ -82,23 +82,40 @@ export default class Model extends Object {
         //     throw new Error('A base model class cannot be querable!');
         // }
 
-        const result = await DB.execute(`
-            SELECT * FROM ${Model.tableName}
-            WHERE id = ?
-            LIMIT 1
-        `, [id]) as RawData[];
+        let found = null;
 
-        const found = result[0] ?? null;
+        try {
+            const result = await DB.execute(`
+                SELECT * FROM ${this.getTableName()}
+                WHERE id = ?
+                LIMIT 1
+            `, [id]) as RawData[];
+
+            found = result[0] ?? null;
+            
+        } catch (err) {
+            console.log(err);
+        }
+
         if (!found) {
             return null;
         }
-        
-        return Model.instantiate(found);
+
+        return this.instantiate(found);
+    }
+
+    protected static getTableName() {
+        if (Model.tableName !== '') return Model.tableName;
+
+        let splittedClsName = this.name.split(/(?=[A-Z])/);
+        splittedClsName = splittedClsName.map(tokenedName => tokenedName.toLowerCase());
+
+        return splittedClsName.join('_') + 's';
     }
 
     protected static instantiate(data: RawData): Model {
         const model: Object & Model = new this();
-
+        
         Object.keys(data).forEach((key: string) => {
             if (model.hasOwnProperty(key)) {
                 model.setAttribute(key, data[key]);
