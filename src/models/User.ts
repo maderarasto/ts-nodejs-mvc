@@ -1,4 +1,4 @@
-import Model, { AttributeValue, ModelAttributes } from "./Model"
+import Model, { useField } from "./Model"
 
 export default class User extends Model {
     
@@ -11,15 +11,15 @@ export default class User extends Model {
         'phone'
     ];
 
-    @Model.property()
+    @useField()
     public first_name?: string;
 
-    @Model.property()
+    @useField()
     public last_name?: string;
 
-    @Model.property()
+    @useField()
     public login?: string;
 
-    @Model.property()
+    @useField('hashable')
     public password?: string;
 }

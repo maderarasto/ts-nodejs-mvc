@@ -24,8 +24,8 @@ app.listen(config.port, async () => {
         password: 'abcdef'
     });
 
-    console.log(u.password);
+    console.log(u.id);
 
-    u.password = '12345';
-    console.log(u.password)
+    u.id = 12345;
+    console.log(u.id)
 });    

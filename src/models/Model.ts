@@ -10,6 +10,31 @@ type ModelProperties = Object & {
     [key: string]: string[]
 };
 
+type FieldOption = ('hashable');
+
+export function useField(...args: FieldOption[]) {
+    return function (_: any, {kind, name, addInitializer}: ClassFieldDecoratorContext) {
+        if (kind !== 'field') return;
+
+        addInitializer(function () {
+            Object.defineProperty(this, name, {
+                get: function () {
+                    return this.attributes[name];
+                },
+                set: function (value: AttributeValue) {
+                    if (!value) return value;
+
+                    if (args.includes('hashable')) {
+                        value = crypto.createHash('md5').update(value as string).digest('hex');
+                    }
+
+                    this.attributes[name] = value;
+                }
+            })
+        });
+    }
+}
+
 export default class Model extends Object {
     protected static readonly PRIMARY_KEY = 'id';
 
@@ -19,19 +44,11 @@ export default class Model extends Object {
 
     protected attributes: ModelAttributes = {};
 
+    @useField()
     public id?: number;
 
     constructor() {
         super();
-        
-        Object.defineProperty(this, 'id', {
-            get: function () {
-                return this.attributes['id'];
-            },
-            set: function (value: number) {
-                this.attributes['id'] = value;
-            }
-        })
     }
 
     public setAttribute(key: string, value: AttributeValue) {
@@ -89,28 +106,5 @@ export default class Model extends Object {
         });
 
         return model;
-    }
-
-    protected static property(hashable: boolean=false) {
-        return function (_: any, {kind, name, addInitializer}: ClassFieldDecoratorContext) {
-            if (kind !== 'field') return;
-    
-            addInitializer(function () {
-                Object.defineProperty(this, name, {
-                    get: function () {
-                        return this.attributes[name];
-                    },
-                    set: function (value: AttributeValue) {
-                        if (!value) return value;
-
-                        if (hashable) {
-                            value = crypto.createHash('md5').update(value as string).digest('hex');
-                        }
-
-                        this.attributes[name] = value;
-                    }
-                })
-            });
-        }
     }
 }
