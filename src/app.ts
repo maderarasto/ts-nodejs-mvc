@@ -12,12 +12,5 @@ app.listen(config.port, async () => {
     
     DB.init();
 
-    const u = await User.find(4) as User;
-    console.log(u.first_name, u.password);
-
-    u.first_name = 'tajneXXX';
-    u.password = 'tajneXXX';
-    u.save();
-    console.log(u);
-    
+    console.log(await User.delete([2]));
 });    

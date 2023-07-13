@@ -268,6 +268,43 @@ export default class Model extends Object {
         return models;
     }
 
+    public static async create(data: ModelAttributes): Promise<Model> {
+        if (this.name === Model.name) {
+            throw new Error('A base model class cannot be querable!');
+        }
+
+        const model = new this();
+        
+        model.fill(data);
+        await model.save();
+
+        return model;
+    }
+
+    public static async delete(ids: number[]): Promise<number> {
+        if (this.name === Model.name) {
+            throw new Error('A base model class cannot be querable!');
+        }
+
+        let result: ResultSetHeader|null = null;
+
+        try {
+            result = await DB.execute(
+                `DELETE FROM ${this.getTableName()} WHERE ID IN (${ids.join(',')})`
+            ) as ResultSetHeader;
+        } catch (err) {
+            console.error(err);
+        }
+
+        if (!result) {
+            return 0;
+        }
+
+        return result.affectedRows;
+    }
+
+
+
     /**
      * Get table name based on model class name or on defined static field in class.
      * 
