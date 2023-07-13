@@ -12,13 +12,12 @@ app.listen(config.port, async () => {
     
     DB.init();
 
-    const u = new User();
-    u.fill({
-        first_name: 'Adam',
-        last_name: 'Kacmar',
-        login: 'akacmar',
-        password: 'tajne123',
-    });
+    const u = await User.find(4) as User;
+    console.log(u.first_name, u.password);
 
+    u.first_name = 'tajneXXX';
+    u.password = 'tajneXXX';
     u.save();
+    console.log(u);
+    
 });    

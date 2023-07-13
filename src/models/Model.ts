@@ -1,5 +1,5 @@
-import { ResultSetHeader } from "mysql2";
-import DB, { RawData } from "../database/DB";
+import { table } from "console";
+import DB, { ResultSetHeader, RowData } from "../database/DB";
 import crypto from 'crypto';
 
 /**
@@ -119,31 +119,46 @@ export default class Model extends Object {
         });
     }
 
-    public async save() {
+    public async save(): Promise<boolean> {
         let sql = '';
+        let values = Object.values(this.attributes);
 
-        const tableName = this.getClass().getTableName();
-        const columns = Object.keys(this.attributes).map(key => {
-            return '`' + key + '`';
-        }).join(',');;
-
-        const values = Object.values(this.attributes).map(value => '?').join(',');
+        const tableName = this.getClass().getTableName();       
 
         if (!this.id) {
+            const valueSymbols = values.map(value => '?').join(',');
+            const columns = Object.keys(this.attributes).map(key => {
+                return '`' + key + '`';
+            }).join(',');
+
             sql += `INSERT INTO \`${tableName}\` (${columns}) VALUES (${values})`
         } else {
+            values = [this.id];
+            const editableFields = Object.entries(this.attributes).filter(([name, _]) => name !== 'id');
+            const fields = Object.entries(editableFields).map(([_,[name, value]]) => {
+                if (typeof value === 'string') {
+                    value = `'${value}'`;
+                }
 
+                return '`' + name + '` = ' + value
+            }).join(', ');
+
+            sql += `UPDATE \`${tableName}\` SET ${fields} WHERE \`id\` = ?`;
         }
         
-        let result;
+        let result: ResultSetHeader|null = null;
 
         try {
-            result = await DB.execute(sql, Object.values(this.attributes));
+            result = await DB.execute(sql, values) as ResultSetHeader;
         } catch (err) {
             console.log(err);
         }
 
-        console.log(result);
+        if (result) {
+            this.id = result.insertId
+        }
+
+        return result ? result.affectedRows > 0 : false;
     }
 
     /**
@@ -166,17 +181,16 @@ export default class Model extends Object {
             throw new Error('A base model class cannot be querable!');
         }
 
-        let found = null;
+        let found: RowData|null = null;
 
         try {
             const result = await DB.execute(`
                 SELECT * FROM ${this.getTableName()}
                 WHERE id = ?
                 LIMIT 1
-            `, [id]) as RawData[];
-
-            found = result[0] ?? null;
+            `, [id]) as RowData[];
             
+            found = result[0] ?? null;
         } catch (err) {
             console.log(err);
         }
@@ -199,13 +213,13 @@ export default class Model extends Object {
             throw new Error('A base model class cannot be querable!');
         }
 
-        let result: RawData[] = [];
+        let result: RowData[] = [];
 
         try {
             result = await DB.execute(`
                 SELECT * FROM ${this.getTableName()}
                 WHERE id IN (${ids.join(',')})
-            `) as RawData[];
+            `) as RowData[];
         } catch (err) {
             console.log(err);
         }
@@ -232,12 +246,12 @@ export default class Model extends Object {
             throw new Error('A base model class cannot be querable!');
         }
 
-        let result: RawData[] = [];
+        let result: RowData[] = [];
 
         try {
             result = await DB.execute(`
                 SELECT * FROM ${this.getTableName()}
-            `) as RawData[];
+            `) as RowData[];
         } catch (err) {
             console.log(err);
         }
@@ -274,12 +288,12 @@ export default class Model extends Object {
      * @param data {RawData} represents record data in table.
      * @returns {Model} a new instance of model
      */
-    protected static instantiate(data: RawData): Model {
-        const model: Object & Model = new this();
+    protected static instantiate(data: RowData): Model {
+        const model = new this();
         
         Object.keys(data).forEach((key: string) => {
             if (model.hasOwnProperty(key)) {
-                model.setAttribute(key, data[key]);
+                model.attributes[key] = data[key];
             }
         });
 

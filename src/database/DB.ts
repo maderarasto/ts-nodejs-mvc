@@ -14,7 +14,14 @@ export type DatabaseCredentials = {
 /**
  * Raw data with properties based on record in DB table.
  */
-export type RawData = mysql.RowDataPacket;
+export type RowData = mysql.RowDataPacket;
+export type ResultSetHeader = mysql.ResultSetHeader;
+export type DbResult = (
+    mysql.RowDataPacket[] |
+    mysql.RowDataPacket[][] |
+    mysql.ResultSetHeader |
+    mysql.ResultSetHeader[]
+)
 
 type DatabaseParameter = (string | number | boolean);
 
@@ -63,11 +70,11 @@ export default class DB {
      * @param values optional values replacing ? in sql query
      * @returns promised result
      */
-    public static async execute(sql: string, values?: DatabaseParameter[]) {
+    public static async execute(sql: string, values?: DatabaseParameter[]): Promise<DbResult> {
         const connection: Connection = await DB.instance.connect();
         
         return new Promise((resolve, reject) => {
-            connection.execute(sql, values, (err, result) => {
+            connection.execute(sql, values, (err, result: DbResult) => {
                 if (err) {
                     reject(err.message);
                 } else {

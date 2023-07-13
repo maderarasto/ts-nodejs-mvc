@@ -26,6 +26,12 @@ export default class User extends Model {
     @useField('hashable')
     public password?: string;
 
+    @useField()
+    public email?: string;
+
+    @useField()
+    public phone?: string;
+
     constructor() {
         super();
     }
