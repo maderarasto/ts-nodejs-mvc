@@ -1,3 +1,4 @@
+import { ResultSetHeader } from "mysql2";
 import DB, { RawData } from "../database/DB";
 import crypto from 'crypto';
 
@@ -85,6 +86,10 @@ export default class Model extends Object {
         super();
     }
 
+    public getClass() {
+        return Object.getPrototypeOf(this).constructor;
+    }
+
     /**
      * Set a new value of model property.
      * 
@@ -112,6 +117,33 @@ export default class Model extends Object {
                 this.setAttribute(key, value);
             }
         });
+    }
+
+    public async save() {
+        let sql = '';
+
+        const tableName = this.getClass().getTableName();
+        const columns = Object.keys(this.attributes).map(key => {
+            return '`' + key + '`';
+        }).join(',');;
+
+        const values = Object.values(this.attributes).map(value => '?').join(',');
+
+        if (!this.id) {
+            sql += `INSERT INTO \`${tableName}\` (${columns}) VALUES (${values})`
+        } else {
+
+        }
+        
+        let result;
+
+        try {
+            result = await DB.execute(sql, Object.values(this.attributes));
+        } catch (err) {
+            console.log(err);
+        }
+
+        console.log(result);
     }
 
     /**

@@ -25,4 +25,8 @@ export default class User extends Model {
 
     @useField('hashable')
     public password?: string;
+
+    constructor() {
+        super();
+    }
 }

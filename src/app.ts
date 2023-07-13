@@ -12,6 +12,13 @@ app.listen(config.port, async () => {
     
     DB.init();
 
-    const u = await User.get();
-    console.log(u);
+    const u = new User();
+    u.fill({
+        first_name: 'Adam',
+        last_name: 'Kacmar',
+        login: 'akacmar',
+        password: 'tajne123',
+    });
+
+    u.save();
 });    
