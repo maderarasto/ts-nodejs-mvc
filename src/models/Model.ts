@@ -119,6 +119,13 @@ export default class Model extends Object {
         });
     }
 
+    /**
+     * Save data of current instance to table.
+     * If model doesn't have id attribute data will be inserted,
+     * otherwise data will be updated of table record with given id.
+     * 
+     * @returns promised information about saving data.
+     */
     public async save(): Promise<boolean> {
         let sql = '';
         let values = Object.values(this.attributes);
@@ -156,6 +163,25 @@ export default class Model extends Object {
 
         if (result) {
             this.id = result.insertId
+        }
+
+        return result ? result.affectedRows > 0 : false;
+    }
+
+    /**
+     * Delete data of current instance from table.
+     * 
+     * @returns promised information abou deletion
+     */
+    public async destroy(): Promise<boolean> {
+        let result: ResultSetHeader|null = null;
+
+        try {
+            result = await DB.execute(
+                `DELETE FROM ${this.getClass().getTableName()} WHERE id = ?`,
+            [this.id as number]) as ResultSetHeader;
+        } catch (err) {
+            console.log(err);
         }
 
         return result ? result.affectedRows > 0 : false;
@@ -268,6 +294,12 @@ export default class Model extends Object {
         return models;
     }
 
+    /**
+     * Create a new instance of model and saves its data to database.
+     * 
+     * @param data represents data of model
+     * @returns promised created model
+     */
     public static async create(data: ModelAttributes): Promise<Model> {
         if (this.name === Model.name) {
             throw new Error('A base model class cannot be querable!');
@@ -281,6 +313,12 @@ export default class Model extends Object {
         return model;
     }
 
+    /**
+     * Delete models from databased by given ids.
+     * 
+     * @param ids represents id attributes of models
+     * @returns promised deleted records from database
+     */
     public static async delete(ids: number[]): Promise<number> {
         if (this.name === Model.name) {
             throw new Error('A base model class cannot be querable!');

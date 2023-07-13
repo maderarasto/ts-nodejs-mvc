@@ -12,5 +12,6 @@ app.listen(config.port, async () => {
     
     DB.init();
 
-    console.log(await User.delete([2]));
+    const u = await User.find(1);
+    console.log(u?.destroy());
 });    
