@@ -8,7 +8,7 @@ export default class IndexController extends Controller {
         
     }
 
-    index(request: Request, repsonse: Response) {
-
+    index() {
+        
     }
 }

@@ -37,7 +37,7 @@ const config: AppConfig = {
     ],
 
     routes: [
-        { path: '/', method: 'GET', controller: IndexController, action: 'index' }
+        { path: '/', method: 'GET', controller: IndexController, action: 'index1' }
     ],
 
     middlewares: []
