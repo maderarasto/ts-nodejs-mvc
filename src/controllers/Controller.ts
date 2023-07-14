@@ -1,5 +1,3 @@
-import { Request, Response } from "express";
-
 export type ControllerClass = { 
     new (): Controller 
 };
@@ -11,6 +9,14 @@ export type Route = {
     controller: ControllerClass,
     action: string,
     guard?: string
+}
+
+export type ErrorResponse = {
+    code: number,
+    error: {
+        message: string,
+        callstack?: string[]
+    }
 }
 
 export default abstract class Controller extends Object {

@@ -1,8 +1,8 @@
-import express, { IRouterMatcher, Express, Request, Response } from 'express';
+import express from 'express';
 
 import DB from './database/DB';
 import config from './config';
-import Controller, { Route } from './controllers/Controller';
+import Controller, { ErrorResponse, Route } from './controllers/Controller';
 
 const app = express();
 const httpCallbacks = {
@@ -36,7 +36,7 @@ app.listen(config.port, async () => {
                 return;
             }
 
-            httpCallbacks[route.method](route.path, (req, res) => {
+            httpCallbacks[route.method](route.path, async (req, res) => {
                 res.setHeader('Content-Type', 'application/json');
 
                 try {
@@ -45,10 +45,19 @@ app.listen(config.port, async () => {
                     }
     
                     // run action
-                    Reflect.get(controller, route.action).call(controller, req, res);
+                    await Reflect.get(controller, route.action).call(controller, req, res);
                 } catch (err) {
                     if (err instanceof Error) {
-                        res.status(400).end(err.stack);
+                        const error: ErrorResponse = {
+                            code: 400,
+                            error: {
+                                message: err.message,
+                                callstack: err.stack?.split('\n') ?? undefined
+                            }
+                        };
+
+                        res.status(400);
+                        res.end(JSON.stringify(error));
                     }
                 }
             });

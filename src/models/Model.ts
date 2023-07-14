@@ -5,7 +5,7 @@ import crypto from 'crypto';
 /**
  * Represent possible values for attributes.
  */
-export type AttributeValue = boolean | number | string;
+export type AttributeValue = boolean | number | string | null;
 
 /**
  * Represents list of attributes of model.
@@ -39,9 +39,7 @@ export function useField(...args: FieldOption[]) {
                     return this.attributes[name];
                 },
                 set: function (value: AttributeValue) {
-                    if (!value) return value;
-
-                    if (args.includes('hashable')) {
+                    if (value && args.includes('hashable')) {
                         value = crypto.createHash('md5').update(value as string).digest('hex');
                     }
 
@@ -128,7 +126,7 @@ export default class Model extends Object {
      */
     public async save(): Promise<boolean> {
         let sql = '';
-        let values = Object.values(this.attributes);
+        let values = Object.values(this.attributes).map(value => value !== undefined ? value : null);
 
         const tableName = this.getClass().getTableName();       
 
@@ -138,7 +136,7 @@ export default class Model extends Object {
                 return '`' + key + '`';
             }).join(',');
 
-            sql += `INSERT INTO \`${tableName}\` (${columns}) VALUES (${values})`
+            sql += `INSERT INTO \`${tableName}\` (${columns}) VALUES (${valueSymbols})`
         } else {
             values = [this.id];
             const editableFields = Object.entries(this.attributes).filter(([name, _]) => name !== 'id');
@@ -153,13 +151,7 @@ export default class Model extends Object {
             sql += `UPDATE \`${tableName}\` SET ${fields} WHERE \`id\` = ?`;
         }
         
-        let result: ResultSetHeader|null = null;
-
-        try {
-            result = await DB.execute(sql, values) as ResultSetHeader;
-        } catch (err) {
-            console.log(err);
-        }
+        const result = await DB.execute(sql, values) as ResultSetHeader;
 
         if (result) {
             this.id = result.insertId
@@ -174,15 +166,8 @@ export default class Model extends Object {
      * @returns promised information abou deletion
      */
     public async destroy(): Promise<boolean> {
-        let result: ResultSetHeader|null = null;
-
-        try {
-            result = await DB.execute(
-                `DELETE FROM ${this.getClass().getTableName()} WHERE id = ?`,
-            [this.id as number]) as ResultSetHeader;
-        } catch (err) {
-            console.log(err);
-        }
+        const sql = `DELETE FROM ${this.getClass().getTableName()} WHERE i = ?`;
+        const result = await DB.execute(sql, [this.id as number]) as ResultSetHeader;
 
         return result ? result.affectedRows > 0 : false;
     }
@@ -207,25 +192,17 @@ export default class Model extends Object {
             throw new Error('A base model class cannot be querable!');
         }
 
-        let found: RowData|null = null;
+        const result = await DB.execute(`
+            SELECT * FROM ${this.getTableName()}
+            WHERE id = ?
+            LIMIT 1
+        `, [id]) as RowData[];
 
-        try {
-            const result = await DB.execute(`
-                SELECT * FROM ${this.getTableName()}
-                WHERE id = ?
-                LIMIT 1
-            `, [id]) as RowData[];
-            
-            found = result[0] ?? null;
-        } catch (err) {
-            console.log(err);
-        }
-
-        if (!found) {
+        if (!result || result.length === 0) {
             return null;
         }
 
-        return this.instantiate(found);
+        return this.instantiate(result[0]);
     }
 
     /**
@@ -239,16 +216,10 @@ export default class Model extends Object {
             throw new Error('A base model class cannot be querable!');
         }
 
-        let result: RowData[] = [];
-
-        try {
-            result = await DB.execute(`
-                SELECT * FROM ${this.getTableName()}
-                WHERE id IN (${ids.join(',')})
-            `) as RowData[];
-        } catch (err) {
-            console.log(err);
-        }
+        const result = await DB.execute(`
+            SELECT * FROM ${this.getTableName()}
+            WHERE id IN (${ids.join(',')})
+        `) as RowData[];
 
         if (!result || result.length === 0) {
             return [];
@@ -272,16 +243,10 @@ export default class Model extends Object {
             throw new Error('A base model class cannot be querable!');
         }
 
-        let result: RowData[] = [];
-
-        try {
-            result = await DB.execute(`
-                SELECT * FROM ${this.getTableName()}
-            `) as RowData[];
-        } catch (err) {
-            console.log(err);
-        }
-
+        const result = await DB.execute(`
+            SELECT * FROM ${this.getTableName()}
+        `) as RowData[];
+        
         if (!result || result.length === 0) {
             return [];
         }
@@ -314,25 +279,41 @@ export default class Model extends Object {
     }
 
     /**
-     * Delete models from databased by given ids.
+     * Delete model from database by given id.
      * 
-     * @param ids represents id attributes of models
-     * @returns promised deleted records from database
+     * @param id 
+     * @returns 
      */
-    public static async delete(ids: number[]): Promise<number> {
+    public static async delete(id: number): Promise<number> {
         if (this.name === Model.name) {
             throw new Error('A base model class cannot be querable!');
         }
 
-        let result: ResultSetHeader|null = null;
+        const result = await DB.execute(
+            `DELETE FROM ${this.getTableName()} WHERE id = ?`
+        , [id]) as ResultSetHeader;
 
-        try {
-            result = await DB.execute(
-                `DELETE FROM ${this.getTableName()} WHERE ID IN (${ids.join(',')})`
-            ) as ResultSetHeader;
-        } catch (err) {
-            console.error(err);
+        if (!result) {
+            return 0;
         }
+
+        return result.affectedRows;
+    }
+
+    /**
+     * Delete models from database by given ids.
+     * 
+     * @param ids represents id attributes of models
+     * @returns promised deleted records from database
+     */
+    public static async deleteMany(ids: number[]): Promise<number> {
+        if (this.name === Model.name) {
+            throw new Error('A base model class cannot be querable!');
+        }
+
+        const result = await DB.execute(
+            `DELETE FROM ${this.getTableName()} WHERE id IN (${ids.join(',')})`
+        ) as ResultSetHeader;
 
         if (!result) {
             return 0;

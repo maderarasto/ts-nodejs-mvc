@@ -23,7 +23,7 @@ export type DbResult = (
     mysql.ResultSetHeader[]
 )
 
-type DatabaseParameter = (string | number | boolean);
+type DatabaseParameter = (string | number | boolean | null);
 
 /**
  * Provides functionality for executing SQL queries and using DB transactions.
@@ -46,7 +46,7 @@ export default class DB {
         return new Promise((resolve, reject) => {
             this.pool.getConnection((err, connection) => {
                 if (err) {
-                    reject(err.message);
+                    reject(err);
                 } else {
                     resolve(connection);
                 }
@@ -76,7 +76,7 @@ export default class DB {
         return new Promise((resolve, reject) => {
             connection.execute(sql, values, (err, result: DbResult) => {
                 if (err) {
-                    reject(err.message);
+                    reject(err);
                 } else {
                     resolve(result);
                 }
@@ -95,7 +95,7 @@ export default class DB {
         return new Promise((resolve, reject) => {
             connection.beginTransaction(err => {
                 if (err) {
-                    reject(err.message);
+                    reject(err);
                 } else {
                     resolve();
                 }
@@ -113,7 +113,7 @@ export default class DB {
         return new Promise((resolve, reject) => {
             connection.commit(err => {
                 if (err) {
-                    reject(err.message);
+                    reject(err);
                 } else {
                     resolve();
                 }
@@ -131,7 +131,7 @@ export default class DB {
         return new Promise((resolve, reject) => {
             connection.rollback(err => {
                 if (err) {
-                    reject(err.message);
+                    reject(err);
                 } else {
                     resolve();
                 }
