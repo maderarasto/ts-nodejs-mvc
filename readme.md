@@ -35,7 +35,7 @@ After installation you can install project dependencie  with command:
 ```bash
 npm install
 ```
-After installing dependencies you can rename file ==.env.example== to ==.env== and set up name and port of your application:
+After installing dependencies you can rename file `.env.example` to `.env` and set up name and port of your application:
 ```
 APP_NAME=NodeJS MVC
 APP_PORT=3000
@@ -46,7 +46,7 @@ After setup you can run server application with command:
 ```bash
 npx ts-node src/app.ts
 ```
-or with pre-defined script ==start==
+or with pre-defined script `start`
 ```bash
 npm run start
 ```
