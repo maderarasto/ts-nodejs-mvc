@@ -3,37 +3,7 @@ The project is template for simple NodeJS application using TypeScript language.
 
 With LiquidJS library you can define custom views with additional helper functions that help you write view templates more easily and access to data from controller.The more information about LiquidJS you can find on its authors webiste [https://liquidjs.com](https://liquidjs.com).
 
-<div>
-    <span style="
-        padding: 3px 7px;
-        border-radius: 5px; 
-        font-size: 12px;
-        color: white; 
-        background-color: #3178c6;"
-    >Typescript</span>
-    <span style="
-        padding: 3px 7px;
-        border-radius: 5px; 
-        font-size: 12px;
-        color: white; 
-        background-color: #4CA64C;"
-    >NodeJS</span>
-    <span style="
-        padding: 3px 7px;
-        border-radius: 5px; 
-        font-size: 12px;
-        color: white; 
-        background-color: #3E6E93;"
-    >MySQL</span>
-    <span style="
-        padding: 3px 7px;
-        border-radius: 5px; 
-        font-size: 12px;
-        color: white; 
-        background-color: #0e83cd;"
-    >LiquidJS</span>
-</div>
-
+Tags: Typescript, NodeJS, MySQL, LiquidJS
 ## Table of contents
 1. [Motivation](#motivation)
 2. [Configuration](#configuration)
@@ -62,7 +32,7 @@ This project was created for purpose to easily create server application with AP
         <h6>Waiting</h6>
         <ul style="list-style-type: none;padding: 0">
             <li>⌛ Authenticating user</li>
-            <li>⌛ Adding session storage<li>
+            <li>⌛ Adding session storage</li>
             <li>⌛ Authenticating via JWT tokens</li>
             <li>⌛ Validating input from requests</li>
             <li>⌛ Defining JSON responses based on model</li>
