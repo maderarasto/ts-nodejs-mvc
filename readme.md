@@ -6,46 +6,40 @@ With LiquidJS library you can define custom views with additional helper functio
 Tags: Typescript, NodeJS, MySQL, LiquidJS
 ## Table of contents
 1. [Motivation](#motivation)
-2. [Configuration](#configuration)
-3. [Using database](#using-database)
-4. [Using Models](#using-models)
-5. [Using Controllers](#using-controllers)
-6. [Using Views](#using-views)
+2. [State of project](#state-of-project)
+3. [Configuration](#configuration)
+4. [Getting started](#gettings-started)
+4.1 [Using database](#using-database)
+4.2 [Using Models](#using-models)
+4.3 [Using Controllers](#using-controllers)
+4.4 [Using Views](#using-views)
 
 ### Motivation
 This project was created for purpose to easily create server application with API for future possible projects. Also for to apply Typescript and NodeJS skill.
 
 ### State of project
-<div style="display: flex">
-    <div style="width: 50%">
-        <h6>Done</h6>
-        <ul style="list-style-type: none;padding: 0">
-            <li>✅ Querying database with MySQL connector</li>
-            <li>✅ Models with basic CRUD operations and get/set accessors based on 
-            properties</li>
-            <li>✅ Using controllers with registered routes in config</li>
-            <li>✅ Error handling to send error JSON (currenly not for views)</li>
-            <li>✅ Rendering view templates using LiquidJS</li>
-        </ul>
-    </div>
-    <div style="width: 50%">
-        <h6>Waiting</h6>
-        <ul style="list-style-type: none;padding: 0">
-            <li>⌛ Authenticating user</li>
-            <li>⌛ Adding session storage</li>
-            <li>⌛ Authenticating via JWT tokens</li>
-            <li>⌛ Validating input from requests</li>
-            <li>⌛ Defining JSON responses based on model</li>
-            <li>⌛ Defining relations between models</li>
-        </ul>
-    </div>
-</div>
+###### Done
+✅ Querying database with MySQL connector
+✅ Models with basic CRUD operations and get/set accessors based on properties
+✅ Using controllers with registered routes in config
+✅ Error handling to send error JSON (currenly not for views)
+✅ Rendering view templates using LiquidJS
+
+###### In development
+⌛ Authenticating user
+⌛ Adding session storage
+⌛ Authenticating via JWT tokens
+⌛ Validating input from requests
+⌛ Defining JSON responses based on model
+⌛ Defining relations between models
+
 ### Configuration
 
-### Using database
+### Gettings Started
+#### Using database
 
-### Using Models
+#### Using Models
 
-### Using Controllers
+#### Using Controllers
 
-### Using Views
+#### Using Views
