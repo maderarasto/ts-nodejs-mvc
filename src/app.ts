@@ -1,10 +1,14 @@
 import express from 'express';
+import { Liquid } from 'liquidjs';
+import path from 'path';
 
 import DB from './database/DB';
 import config from './config';
 import Controller, { ErrorResponse, Route } from './controllers/Controller';
 
 const app = express();
+const engine = new Liquid();
+
 const httpCallbacks = {
     GET: app.get.bind(app),
     POST: app.post.bind(app),
@@ -13,7 +17,10 @@ const httpCallbacks = {
     DELETE: app.delete.bind(app)
 };
 
-app.use(express.json());
+app.engine('liquid', engine.express());
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'liquid');
+
 app.listen(config.port, async () => {
     console.log(`App is listening on port ${config.port}...`);
     
@@ -37,7 +44,7 @@ app.listen(config.port, async () => {
             }
 
             httpCallbacks[route.method](route.path, async (req, res) => {
-                res.setHeader('Content-Type', 'application/json');
+                //res.setHeader('Content-Type', 'application/json');
 
                 try {
                     if (!Reflect.has(controller, route.action)) {

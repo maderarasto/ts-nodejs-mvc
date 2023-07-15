@@ -9,7 +9,7 @@ export default class IndexController extends Controller {
         
     }
 
-    async index() {
-        
+    async index(req: Request, res: Response) {
+        res.render('home');
     }
 }
