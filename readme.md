@@ -3,43 +3,39 @@ The project is template for simple NodeJS application using TypeScript language.
 
 With LiquidJS library you can define custom views with additional helper functions that help you write view templates more easily and access to data from controller.The more information about LiquidJS you can find on its authors webiste [https://liquidjs.com](https://liquidjs.com).
 
-Tags: Typescript, NodeJS, MySQL, LiquidJS
+**Tags**: Typescript, NodeJS, MySQL, LiquidJS
 ## Table of contents
 1. [Motivation](#motivation)
 2. [State of project](#state-of-project)
 3. [Configuration](#configuration)
 4. [Getting started](#gettings-started)
-4.1 [Using database](#using-database)
-4.2 [Using Models](#using-models)
-4.3 [Using Controllers](#using-controllers)
-4.4 [Using Views](#using-views)
 
-### Motivation
+## Motivation
 This project was created for purpose to easily create server application with API for future possible projects. Also for to apply Typescript and NodeJS skill.
 
-### State of project
-###### Done
-✅ Querying database with MySQL connector
-✅ Models with basic CRUD operations and get/set accessors based on properties
-✅ Using controllers with registered routes in config
-✅ Error handling to send error JSON (currenly not for views)
-✅ Rendering view templates using LiquidJS
+## State of project
+#### Done
+✅ Querying database with MySQL connector<br />
+✅ Models with basic CRUD operations and get/set accessors based on properties<br />
+✅ Using controllers with registered routes in config<br />
+✅ Error handling to send error JSON (currenly not for views)<br />
+✅ Rendering view templates using LiquidJS<br />
 
-###### In development
-⌛ Authenticating user
-⌛ Adding session storage
-⌛ Authenticating via JWT tokens
-⌛ Validating input from requests
-⌛ Defining JSON responses based on model
-⌛ Defining relations between models
+#### In development
+⌛ Authenticating user<br />
+⌛ Adding session storage<br />
+⌛ Authenticating via JWT tokens<br />
+⌛ Validating input from requests<br />
+⌛ Defining JSON responses based on model<br />
+⌛ Defining relations between models<br />
 
-### Configuration
+## Configuration
 
-### Gettings Started
-#### Using database
+## Gettings Started
+### Using database
 
-#### Using Models
+### Using Models
 
-#### Using Controllers
+### Using Controllers
 
-#### Using Views
+### Using Views
