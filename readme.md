@@ -30,7 +30,26 @@ This project was created for purpose to easily create server application with AP
 ⌛ Defining relations between models<br />
 
 ## Configuration
+This is Node.js project, so before installing [download and install latest Node.js](https://nodejs.org/en/download/current).
+After installation you can install project dependencie  with command:
+```bash
+npm install
+```
+After installing dependencies you can rename file ==.env.example== to ==.env== and set up name and port of your application:
+```
+APP_NAME=NodeJS MVC
+APP_PORT=3000
+...
+```
 
+After setup you can run server application with command:
+```bash
+npx ts-node src/app.ts
+```
+or with pre-defined script ==start==
+```bash
+npm run start
+```
 ## Gettings Started
 ### Using database
 
