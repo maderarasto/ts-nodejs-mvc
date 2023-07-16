@@ -3,6 +3,8 @@ import Controller from "./Controller";
 
 export default class IndexController extends Controller {
     async index(req: Request, res: Response) {
-        res.render('home');
+        res.render('home_', (err: Error) => {
+            throw err;
+        });
     }
 }

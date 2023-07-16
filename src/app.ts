@@ -5,6 +5,7 @@ import path from 'path';
 import DB from './database/DB';
 import config from './config';
 import Controller, { ErrorResponse, Route } from './controllers/Controller';
+import { ErrorHandler } from './utils';
 
 const app = express();
 const engine = new Liquid();
@@ -17,10 +18,10 @@ const httpCallbacks = {
     DELETE: app.delete.bind(app)
 };
 
-// app.engine('liquid', engine.express());
-// app.set('views', path.join(__dirname, 'views'));
-// app.set('view engine', 'liquid');
-app.use(express.json());
+app.engine('liquid', engine.express());
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'liquid');
+
 app.listen(config.port, async () => {
     console.log(`App is listening on port ${config.port}...`);
     
@@ -47,25 +48,9 @@ app.listen(config.port, async () => {
                 //res.setHeader('Content-Type', 'application/json');
 
                 try {
-                    if (!Reflect.has(controller, route.action)) {
-                        throw new Error(`Action ${route.action} doesn't exists on controller ${controllerCls.name}!`);
-                    }
-    
-                    // run action
-                    await Reflect.get(controller, route.action).call(controller, req, res);
+                    await controller.call(route.action, req, res);
                 } catch (err) {
-                    if (err instanceof Error) {
-                        const error: ErrorResponse = {
-                            code: 400,
-                            error: {
-                                message: err.message,
-                                callstack: err.stack?.split('\n') ?? undefined
-                            }
-                        };
-
-                        res.status(400);
-                        res.end(JSON.stringify(error));
-                    }
+                    new ErrorHandler().handle(err as Error, res);
                 }
             });
         });
