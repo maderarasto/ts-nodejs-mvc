@@ -224,4 +224,65 @@ await User.delete(1);
 await User.deleteMany([1, 2, 3]);
 ```
 ### Controllers
+When we want to use function trigger either from web or API we can use controllers.
+Methods of controller can be binded with routes in file `config.ts`. So when route is matched then it can trigger action (controller's method) and run some of your code.
+
+#### Creating your controller
+First you will to create you controller class in `controllers` folder that will be extending from `class Controller` with some method.
+
+It is recommended to use action like this:
+- get list of resources with action `index(req, res)`
+- get a specific resource with action `get(req, res)`
+- create a new resource with action `create(req, res)`
+- update a specific resource with action `update(req, res)`
+- delete a specific resource with action `delete(req, res)`
+
+But feel free to use what works better for you.
+
+```typescript
+import { Request, Response } from 'express'
+import Controller from "./Controller";
+
+export default class IndexController extends Controller {
+    async index(req: Request, res: Response) {
+        res.end('<h1>Home</h1>');
+    }
+}
+```
+Then it is necessary register your new controller class in config file `config.ts`:
+```typescript
+import IndexController from './controllers/IndexController';
+...
+const config: AppConfig = {
+    ...
+    controllers: [
+        IndexController
+    ]
+}
+```
+
+Also in the same file `config.ts` it is necessary register route that can be matched and trigger action with corresponding controller:
+```typescript
+import IndexController from './controllers/IndexController';
+...
+const config: AppConfig = {
+    ...
+    controllers: [
+        IndexController
+    ],
+
+    routes: [
+        { path: '/', method: 'GET', controller: IndexController, action: 'index'}
+    ]
+}
+```
+#### Request and Response
+Action parameters `req: Request` and `res: Response` are necessary parameters for processing GET/POST data and subsequently sending response to user.
+##### Request
+In `Request` object you can find information about processed request such as url, query, params, body or headers.
+##### Response
+With `Response` object you can manipulate what can be send in response. You can set up headers, status, content and subsequently send response.
+
+If you are using render engine you can also render template view by using method `render`.
 ### Views
+### Error handling
