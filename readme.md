@@ -313,3 +313,15 @@ export default class IndexController extends Controller {
 }
 ```
 ### Error handling
+Thrown errors are handle on level above currently processed controller so all error should be caught and currently sending aj JSON response with caught error. All errors are sent with status code `400` with error message and callstack:
+```json
+{
+    "code": 400,
+    "error": {
+        "message": "Error message...",
+        "callstack": [
+            ...
+        ]
+    }
+}
+```

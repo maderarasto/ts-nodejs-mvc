@@ -17,10 +17,10 @@ const httpCallbacks = {
     DELETE: app.delete.bind(app)
 };
 
-app.engine('liquid', engine.express());
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'liquid');
-
+// app.engine('liquid', engine.express());
+// app.set('views', path.join(__dirname, 'views'));
+// app.set('view engine', 'liquid');
+app.use(express.json());
 app.listen(config.port, async () => {
     console.log(`App is listening on port ${config.port}...`);
     
