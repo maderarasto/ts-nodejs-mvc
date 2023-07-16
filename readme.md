@@ -285,4 +285,31 @@ With `Response` object you can manipulate what can be send in response. You can 
 
 If you are using render engine you can also render template view by using method `render`.
 ### Views
+For the rendering views as response from controller application uses [LiquidJS](https://liquidjs.com) template engine. [LiquidJS](https://liquidjs.com) uses own file types `.liquid` for templates that supports HTML. In template you can use many helper functions such as conditions, for loops, using variables and so on. Detailed information how to use helpers function you can find [on their website](https://liquidjs.com/tags/overview.html).
+#### Rendering template file
+First you will need to create a new template file in folder `views` with file type `.liquid` in example `home.liquid`.
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+  </head>
+  <body>
+    <h1>Home</h1>
+  </body>
+</html>
+```
+Then you can render your template file in your controller method with `Response` object and used its method `render` to render your template file. It is necessary to pass name of your template file that you created in `views` folder.
+```typescript
+import { Request, Response } from 'express'
+import Controller from "./Controller";
+
+export default class IndexController extends Controller {
+    async index(req: Request, res: Response) {
+        res.render('home');
+    }
+}
+```
 ### Error handling
