@@ -51,8 +51,8 @@ or with pre-defined script `start`
 npm run start
 ```
 ## Gettings Started
-### Using database
-First you will need enter environment variables in file `.env` to ensure that connection to [MySQL](https://www.mysql.com/) database can be done. Fill out `DB_HOST`, `DB_USER`, `DB_PASS` and `DB_NAME`:
+### Database
+First you will need define environment variables in file `.env` to ensure that connection to [MySQL](https://www.mysql.com/) database can be done. Fill out `DB_HOST`, `DB_USER`, `DB_PASS` and `DB_NAME` variables:
 ```
 # DATABASE SETTINGS
 DB_HOST=
@@ -60,7 +60,7 @@ DB_USER=
 DB_PASS=
 DB_NAME=
 ```
-Then you can execute SQL queries using async method `execute` on object `DB`. Don't forget use `await` or process `Promise` to access result of execution.
+Then you can execute SQL queries using async method `execute` on object `DB`. Don't forget use `await` or to process a `Promise` to access result of execution.
 ```typescript
 import DB, {RowData} from 'database/DB';
 
@@ -69,7 +69,7 @@ import DB, {RowData} from 'database/DB';
 const result = await DB.execute('SELECT * FROM users') as RowData[];
 ...
 ```
-When you are using parameters passign to SQL query, you should in SQL query instead of values use `?` and values then pass to second parameter, in which expects array of values as they follow each other in SQL query.
+When you are using parameters that you pass to SQL query, you should replace values in SQL query with symbol `?` and values then pass to second parameter, in which expects array of values as they follow each other in SQL query.
 ```typescript
 import DB, {ResultSetHeader} from 'database/DB';
 
@@ -91,12 +91,137 @@ try {
     ...
     await DB.commit();
 } catch {
-    DB.rollback();
+    await DB.rollback();
 }
 
 ```
-### Using Models
+### Models
+Models are objects that interact with database and each model corresponds to each database table. Models allow you easily interact with database using their methods such as finding models by their ids, saving them with current state of their data or deleting them.
 
-### Using Controllers
+##### Creating model
+First you will need to craete new class for your model. The model name should by capitalized and in form of singular of model as example `class User`. Your model should also contains properties that corresponds with your table columns and their names have to be the same as your table columns. 
 
-### Using Views
+Each property property should has `public` access and be marked as possible undefined with symbol `?`. Also above each property should use decorator `useField()` to ensure that all properties have get/set accessors. With decorator `useField()` you can also alter setter so in example password can be hashable.
+
+```typescript
+import Mode, {useField} from './Model';
+
+export default class extends Model {
+    @useField()
+    public login?: string;
+
+    @useField('hashable')
+    public password?: string;
+
+    ...
+}
+```
+
+#### Table name
+In default your model class expects that the name of table is lowercased of its name and followed by letters `s` that refers to plural of that model. When there are more capitalized letters in the name of model, then each words are joined by a symbol `_`. So if we have a model class `UserToken` then we should also have a table with name `user_tokens`. 
+
+However table name can also be overriden by your own name by overriding static member `tableName` of class `Model` like this:
+```typescript
+import Model from './Model';
+
+export default class User extends Model {
+    protected statit tableName: string = 'user_table';
+
+    ...
+}
+```
+#### Inserting data
+You can insert new data with your model either creating new instance of your model with given data and then save it with method `save()` or using a static method `create(data: ModelProperties)` that will create a new instance and save data to database.
+
+###### Fill your model with data
+To fill data of your model you can set properties individually:
+```typescript
+const user = new User();
+user.first_name = 'John';
+user.last_name = 'Doe';
+...
+```
+Or you can fill them massively using object of type `ModelProperties` and pass it as data to method `fill(data: ModelProperties)`. First you will need in your model class override a static member variable `fillable` to ensure only your defined fields can be stored. Like this:
+```typescript
+import Model from './Model';
+
+export default class User extends Model {
+    
+    protected static fillable: string[] = [
+        'first_name',
+        'last_name'
+    ]
+    ...
+}
+```
+And then you can use method `fill`
+```typescript
+const user = new User()
+user.fill({
+    first_name: 'John',
+    // other values ...
+})
+```
+###### Using instance method `save`
+Inserting data with creating an instance, filling instance with given data and then manually saving them can be done like this:
+```typescript
+const user = new User()
+user.fill({
+    first_name: 'John',
+    last_name: 'Doe'
+});
+await user.save();
+```
+
+###### Using static method `create`
+You can insert data into table using static method `create(data: ModelProperties)` that that internally create instance, fill data with newly created instance and at the end it saves data into corresponding table. Since it's filling data massively then it is necessary set up `fillable` so it can store all your required values.
+```typescript
+...
+User.create({
+    first_name: 'John',
+    last_name: 'Doe'
+});
+```
+#### Accessing data
+To access your model data you can use static methods for finding one instance with its id, find more instances with an array of ids or access all instances. If you want access specific field for your model you have to override type with keyword `as`.
+```typescript
+import User from './models/User';
+
+...
+// one instance
+const user = await User.find(1) as User;
+
+// many instances
+const usersMany = await User.findMany([1, 2]);
+
+// all instances
+const usersAll = await User.get();
+```
+#### Manipulating data
+You can update fields of your model or delete whole record. But you can't change `id` property because data are in corresponding tables identified by primary key`id`.
+###### Update data
+```typescript
+...
+
+const user = await User.find(1) as User;
+user.first_name = 'Jane';
+wait user.save();
+```
+###### Delete data
+You can delete data with model by using instance method `destroy` that delete data from database but instance of model still exists.
+```typescript
+...
+const user = User.find(1) as User;
+await user.destroy();
+```
+
+Or by using static methods for deleting data by their ids with `delete(id: number)` and `deleteMany(ids: number[])`.
+```typescript
+// Delete one specific user
+await User.delete(1);
+
+// Delete more users
+await User.deleteMany([1, 2, 3]);
+```
+### Controllers
+### Views
