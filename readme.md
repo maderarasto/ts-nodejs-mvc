@@ -22,7 +22,6 @@ This project was created for purpose to easily create server application with AP
 ✅ Rendering view templates using LiquidJS<br />
 
 #### In development
-⌛ Extract error handling to own class<br />
 ⌛ Authenticating user<br />
 ⌛ Adding session storage<br />
 ⌛ Authenticating via JWT tokens<br />
