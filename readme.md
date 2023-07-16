@@ -98,7 +98,7 @@ try {
 ### Models
 Models are objects that interact with database and each model corresponds to each database table. Models allow you easily interact with database using their methods such as finding models by their ids, saving them with current state of their data or deleting them.
 
-##### Creating model
+#### Creating model
 First you will need to craete new class for your model. The model name should by capitalized and in form of singular of model as example `class User`. Your model should also contains properties that corresponds with your table columns and their names have to be the same as your table columns. 
 
 Each property property should has `public` access and be marked as possible undefined with symbol `?`. Also above each property should use decorator `useField()` to ensure that all properties have get/set accessors. With decorator `useField()` you can also alter setter so in example password can be hashable.
@@ -133,7 +133,7 @@ export default class User extends Model {
 #### Inserting data
 You can insert new data with your model either creating new instance of your model with given data and then save it with method `save()` or using a static method `create(data: ModelProperties)` that will create a new instance and save data to database.
 
-###### Fill your model with data
+##### Fill your model with data
 To fill data of your model you can set properties individually:
 ```typescript
 const user = new User();
@@ -162,7 +162,7 @@ user.fill({
     // other values ...
 })
 ```
-###### Using instance method `save`
+##### Using instance method `save`
 Inserting data with creating an instance, filling instance with given data and then manually saving them can be done like this:
 ```typescript
 const user = new User()
@@ -173,7 +173,7 @@ user.fill({
 await user.save();
 ```
 
-###### Using static method `create`
+##### Using static method `create`
 You can insert data into table using static method `create(data: ModelProperties)` that that internally create instance, fill data with newly created instance and at the end it saves data into corresponding table. Since it's filling data massively then it is necessary set up `fillable` so it can store all your required values.
 ```typescript
 ...
@@ -199,7 +199,7 @@ const usersAll = await User.get();
 ```
 #### Manipulating data
 You can update fields of your model or delete whole record. But you can't change `id` property because data are in corresponding tables identified by primary key`id`.
-###### Update data
+##### Update data
 ```typescript
 ...
 
@@ -207,7 +207,7 @@ const user = await User.find(1) as User;
 user.first_name = 'Jane';
 wait user.save();
 ```
-###### Delete data
+##### Delete data
 You can delete data with model by using instance method `destroy` that delete data from database but instance of model still exists.
 ```typescript
 ...
