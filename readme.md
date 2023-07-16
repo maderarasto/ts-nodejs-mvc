@@ -231,11 +231,11 @@ Methods of controller can be binded with routes in file `config.ts`. So when rou
 First you will to create you controller class in `controllers` folder that will be extending from `class Controller` with some method.
 
 It is recommended to use action like this:
-- get list of resources with action `index(req, res)`
-- get a specific resource with action `get(req, res)`
-- create a new resource with action `create(req, res)`
-- update a specific resource with action `update(req, res)`
-- delete a specific resource with action `delete(req, res)`
+- get list of resources with action `index(req)`
+- get a specific resource with action `get(req)`
+- create a new resource with action `create(req)`
+- update a specific resource with action `update(req)`
+- delete a specific resource with action `delete(req)`
 
 But feel free to use what works better for you.
 
@@ -244,8 +244,8 @@ import { Request, Response } from 'express'
 import Controller from "./Controller";
 
 export default class IndexController extends Controller {
-    async index(req: Request, res: Response) {
-        res.end('<h1>Home</h1>');
+    async index(req: Request) {
+        this.response.send('<h1>Home</h1>');
     }
 }
 ```
@@ -277,11 +277,11 @@ const config: AppConfig = {
 }
 ```
 #### Request and Response
-Action parameters `req: Request` and `res: Response` are necessary parameters for processing GET/POST data and subsequently sending response to user.
+Action parameter `req: Request` is necessary for processing GET/POST data. Sending response can be done with controller property `reponse`.
 ##### Request
 In `Request` object you can find information about processed request such as url, query, params, body or headers.
 ##### Response
-With `Response` object you can manipulate what can be send in response. You can set up headers, status, content and subsequently send response.
+With `response` property you can manipulate what can be send in response. You can set up headers, content and subsequently send response with status code.
 
 If you are using render engine you can also render template view by using method `render`.
 ### Views
@@ -301,14 +301,14 @@ First you will need to create a new template file in folder `views` with file ty
   </body>
 </html>
 ```
-Then you can render your template file in your controller method with `Response` object and used its method `render` to render your template file. It is necessary to pass name of your template file that you created in `views` folder.
+Then you can render your template file in your controller method with controller property `response` and use its method `render` to render your template file. It is necessary to pass name of your template file that you created in `views` folder.
 ```typescript
-import { Request, Response } from 'express'
+import { Request } from 'express'
 import Controller from "./Controller";
 
 export default class IndexController extends Controller {
-    async index(req: Request, res: Response) {
-        res.render('home');
+    async index(req: Request) {
+        this.response.render('home');
     }
 }
 ```
@@ -320,7 +320,8 @@ Thrown errors are handle on level above currently processed controller so all er
     "error": {
         "message": "Error message...",
         "callstack": [
-            ...
+            
+            //...
         ]
     }
 }

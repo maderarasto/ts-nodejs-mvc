@@ -27,7 +27,7 @@ app.listen(config.port, async () => {
     
     // Initialize database
     DB.init();
-
+    
     // Initialize controllers
     config.controllers.forEach(controllerCls => {
         const controller = new controllerCls();

@@ -1,4 +1,4 @@
-import { Request, Response as ExpressResponse } from "express";
+import { Request, Response as ExpressResponse, CookieOptions } from "express";
 
 export type ControllerClass = { 
     new (): Controller 
@@ -21,12 +21,44 @@ export type ErrorResponse = {
     }
 }
 
-class Response {
-    constructor(private response: ExpressResponse) {
+export class Response {
+    constructor(private response: ExpressResponse) {}
 
+    hasHeader(name: string): boolean {
+        return this.response.hasHeader(name);
     }
 
-    send() {
+    clearCookie(name: string) {
+        this.response.clearCookie(name);
+    }
+
+    header(name: string, value: string) {
+        this.response.header(name, value);
+        return this;
+    }
+
+    cookie(name: string, value: string, options: CookieOptions = {}) {
+        this.response.cookie(name, value, options);
+        return this;
+    }
+
+    render(view: string, data?: object) {
+        this.response.render(view, data, (err, html) => {
+            if (err) {
+                throw err;
+            }
+
+            this.response.send(html);
+        })
+    }
+
+    redirect(path: string) {
+        this.response.redirect(path);
+    }
+
+    send(body?: any, status: number = 200) {
+        this.response.status(status);
+        this.response.send(body)
     }
 }
 
@@ -45,10 +77,11 @@ export default abstract class Controller extends Object {
             throw new Error(`Action ${action} doesn't exists on controller ${this.constructor.name}!`);
         }
 
-        const func = await Reflect.get(this, action) as Function;
-        func.call(this, req);        
-        this.response.
+        const func = Reflect.get(this, action) as Function;
+        await func.call(this, req);        
+        
         this._response = undefined;
+        console.log(res);
     }
 
     protected get response(): Response {
