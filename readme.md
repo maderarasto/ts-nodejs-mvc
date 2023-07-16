@@ -11,7 +11,7 @@ With [LiquidJS](https://liquidjs.com/) library you can define custom views with 
 4. [Getting started](#gettings-started)
 
 ## Motivation
-This project was created for purpose to easily create server application with API for future possible projects. Also for to apply [Typescript](https://www.typescriptlang.org/) and [Node.js](https://nodejs.org/en) skill.
+This project was created for purpose to easily create server application with API for future projects and to apply [Typescript](https://www.typescriptlang.org/) and [Node.js](https://nodejs.org/en) skills.
 
 ## State of project
 #### Done
