@@ -20,9 +20,9 @@ This project was created for purpose to easily create server application with AP
 ✅ Using controllers with registered routes in config<br />
 ✅ Error handling to send error JSON (currenly not for views)<br />
 ✅ Rendering view templates using LiquidJS<br />
+✅ Authenticating user<br />
 
 #### In development
-⌛ Authenticating user<br />
 ⌛ Adding session storage<br />
 ⌛ Authenticating via JWT tokens<br />
 ⌛ Validating input from requests<br />

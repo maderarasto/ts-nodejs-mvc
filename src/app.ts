@@ -6,6 +6,7 @@ import DB from './database/DB';
 import config from './config';
 import Controller, { ErrorResponse, Route } from './controllers/Controller';
 import { ErrorHandler } from './utils';
+import User from './models/User';
 
 const app = express();
 const engine = new Liquid();
