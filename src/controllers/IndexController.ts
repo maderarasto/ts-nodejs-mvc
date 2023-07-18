@@ -4,11 +4,7 @@ import User from '../models/User';
 
 export default class IndexController extends Controller {
     async index(req: Request, res: Response) {
-        console.log(await User.auth({
-            login: 'rmadera',
-            password: '345938Ab'
-        }));
-
+        console.log(req.session);
         this.response.render('home');
     }
 }

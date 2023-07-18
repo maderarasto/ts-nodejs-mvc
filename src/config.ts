@@ -3,6 +3,7 @@ import { DatabaseCredentials } from "./database/DB";
 import { ControllerClass, Route } from './controllers/Controller';
 import IndexController from './controllers/IndexController';
 import { getenv } from './utils';
+import moment from 'moment';
 
 dotenv.config();
 
@@ -12,6 +13,11 @@ type AppConfig = {
     
     database: {
         credentials: DatabaseCredentials
+    },
+
+    session: {
+        secret: string,
+        cookie_age: number
     },
 
     controllers: ControllerClass[],
@@ -30,6 +36,11 @@ const config: AppConfig = {
             password: getenv('DB_PASS'),
             database: getenv('DB_NAME')
         }
+    },
+
+    session: {
+        secret: getenv('SESSION_SECRET'),
+        cookie_age: moment.duration(1, 'hours').asMilliseconds()
     },
 
     controllers: [

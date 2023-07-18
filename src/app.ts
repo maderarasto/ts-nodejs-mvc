@@ -1,5 +1,6 @@
 import express from 'express';
 import { Liquid } from 'liquidjs';
+import session from 'express-session';
 import path from 'path';
 
 import DB from './database/DB';
@@ -22,6 +23,16 @@ const httpCallbacks = {
 app.engine('liquid', engine.express());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'liquid');
+
+// Set up sessions
+app.use(session({
+    secret: config.session.secret,
+    saveUninitialized: true,
+    cookie: {
+        maxAge: config.session.cookie_age
+    },
+    resave: false
+}));
 
 app.listen(config.port, async () => {
     console.log(`App is listening on port ${config.port}...`);
