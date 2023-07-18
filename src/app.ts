@@ -28,9 +28,6 @@ app.set('view engine', 'liquid');
 app.use(session({
     secret: config.session.secret,
     saveUninitialized: true,
-    cookie: {
-        maxAge: config.session.cookie_age
-    },
     resave: false
 }));
 

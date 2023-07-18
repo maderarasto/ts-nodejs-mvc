@@ -17,7 +17,7 @@ type AppConfig = {
 
     session: {
         secret: string,
-        cookie_age: number
+        lifetime: number,
     },
 
     controllers: ControllerClass[],
@@ -27,7 +27,7 @@ type AppConfig = {
 
 const config: AppConfig = {
     name: getenv('APP_NAME'),
-    port: parseInt(getenv('APP_PORT')),
+    port: parseInt(getenv('APP_PORT', '3000')),
 
     database: {
         credentials: {
@@ -40,7 +40,8 @@ const config: AppConfig = {
 
     session: {
         secret: getenv('SESSION_SECRET'),
-        cookie_age: moment.duration(1, 'hours').asMilliseconds()
+        lifetime: parseInt(getenv('SESSION_LIFETIME', '120')),
+        
     },
 
     controllers: [
