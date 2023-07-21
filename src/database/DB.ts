@@ -1,4 +1,4 @@
-import mysql, {Pool, Connection} from 'mysql2';
+import mysql, {Pool, Connection, PoolConnection} from 'mysql2';
 import config from '../config';
 
 /**
@@ -42,7 +42,7 @@ export default class DB {
         });
     }
 
-    private connect(): Promise<Connection> {
+    private connect(): Promise<PoolConnection> {
         return new Promise((resolve, reject) => {
             this.pool.getConnection((err, connection) => {
                 if (err) {
@@ -54,6 +54,10 @@ export default class DB {
         })
     }
 
+    private disconnect(connection: PoolConnection) {
+        this.pool.releaseConnection(connection);
+    }
+
     /**
      * Initialize singleton instance of database.
      */    
@@ -61,6 +65,20 @@ export default class DB {
         if (!DB.instance) {
             DB.instance = new DB();
         }
+    }
+
+    public static close(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            if (!DB.instance.pool) return resolve();
+
+            DB.instance.pool.end(err => {
+                if (err) {
+                    reject(err);
+                }
+
+                resolve();
+            })
+        })
     }
 
     /**
@@ -71,7 +89,7 @@ export default class DB {
      * @returns promised result
      */
     public static async execute(sql: string, values?: DatabaseParameter[]): Promise<DbResult> {
-        const connection: Connection = await DB.instance.connect();
+        const connection: PoolConnection = await DB.instance.connect();
         
         return new Promise((resolve, reject) => {
             connection.execute(sql, values, (err, result: DbResult) => {
@@ -80,6 +98,8 @@ export default class DB {
                 } else {
                     resolve(result);
                 }
+
+                DB.instance.disconnect(connection);
             });
         })
     }
@@ -99,6 +119,8 @@ export default class DB {
                 } else {
                     resolve();
                 }
+
+                DB.instance.disconnect(connection);
             });
         });
     }
@@ -117,6 +139,8 @@ export default class DB {
                 } else {
                     resolve();
                 }
+
+                DB.instance.disconnect(connection);
             });
         });
     }
@@ -135,6 +159,8 @@ export default class DB {
                 } else {
                     resolve();
                 }
+
+                DB.instance.disconnect(connection);
             });
         });
     }
