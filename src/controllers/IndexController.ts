@@ -1,10 +1,12 @@
 import { Request, Response } from 'express'
 import Controller from "./Controller";
 import User from '../models/User';
+import { AuthService } from '../services';
 
 export default class IndexController extends Controller {
     async index(req: Request, res: Response) {
-        console.log(req.session.id);
-        this.response.render('home');
+        this.response.render('home', {
+            userId: req.session.userId
+        });
     }
 }
