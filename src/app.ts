@@ -1,16 +1,31 @@
 import express from 'express';
 import { Liquid } from 'liquidjs';
 import session from 'express-session';
+import moment from 'moment';
 import path from 'path';
 
 import DB from './database/DB';
 import config from './config';
-import Controller, { ErrorResponse, Route } from './controllers/Controller';
-import { ErrorHandler } from './utils';
-import User from './models/User';
+import { ErrorHandler, getenv } from './utils';
 
 const app = express();
 const engine = new Liquid();
+
+declare module 'express-session' {
+    interface SessionData {
+        userId?: number
+    }
+}
+
+const MySQLStore = require('express-mysql-session')(session);
+const sessionStore = new MySQLStore({
+    host: config.database.credentials.host,
+    user: config.database.credentials.user,
+    pass: config.database.credentials.password,
+    database: config.database.credentials.database,
+    //expiration: moment.duration(config.session.lifetime, 'minutes').asMilliseconds(),
+    expiration: 60000
+});
 
 const httpCallbacks = {
     GET: app.get.bind(app),
@@ -26,6 +41,7 @@ app.set('view engine', 'liquid');
 
 // Set up sessions
 app.use(session({
+    store: sessionStore,
     secret: config.session.secret,
     saveUninitialized: true,
     resave: false

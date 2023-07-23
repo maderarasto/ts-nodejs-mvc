@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { ErrorResponse } from "./controllers/Controller";
+// import { ErrorResponse } from "../controllers/Controller";
 
 /**
  * Get value of environment variable from .env file.

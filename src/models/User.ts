@@ -1,11 +1,5 @@
 import DB, { RowData } from "../database/DB";
 import Model, { useField } from "./Model"
-import crypto from 'crypto';
-
-type UserCredentials = {
-    login: string,
-    password: string,
-}
 
 /**
  * Represents a user in system.
@@ -43,9 +37,7 @@ export default class User extends Model {
         super();
     }
 
-    public static async auth(credentials: UserCredentials, rememberMe?: string): Promise<boolean> {
-        const {login, password} = credentials;
-        
+    public static async findByLogin(login: string): Promise<User | null> {
         const result = await DB.execute(`
             SELECT * FROM users
             WHERE login = ?
@@ -53,12 +45,9 @@ export default class User extends Model {
         `, [login]) as RowData[];
 
         if (result.length === 0) {
-            return false;
+            return null;
         }
 
-        const user = this.instantiate(result[0]) as User;
-        const passwordHashed = crypto.createHash('md5').update(password).digest('hex');
-
-        return user.password === passwordHashed;
+        return this.instantiate(result[0]) as User;
     }
 }
