@@ -1,12 +1,14 @@
 import express from 'express';
 import { Liquid } from 'liquidjs';
-import session from 'express-session';
+import session, { Store } from 'express-session';
 import moment from 'moment';
+import fs from 'fs';
 import path from 'path';
 
 import DB from './database/DB';
 import config from './config';
 import { ErrorHandler, getenv } from './utils';
+import { existsSync } from 'fs';
 
 const app = express();
 const engine = new Liquid();
@@ -18,14 +20,26 @@ declare module 'express-session' {
 }
 
 const MySQLStore = require('express-mysql-session')(session);
-const sessionStore = new MySQLStore({
-    host: config.database.credentials.host,
-    user: config.database.credentials.user,
-    pass: config.database.credentials.password,
-    database: config.database.credentials.database,
-    //expiration: moment.duration(config.session.lifetime, 'minutes').asMilliseconds(),
-    expiration: 60000
-});
+const FileStore = require('session-file-store')(session);
+
+let sessionStore: Store;
+
+if (config.session.driver === 'database') {
+    sessionStore = new MySQLStore({
+        host: config.database.credentials.host,
+        user: config.database.credentials.user,
+        pass: config.database.credentials.password,
+        database: config.database.credentials.database,
+        expiration: moment.duration(config.session.lifetime, 'minutes').asMilliseconds(),
+    });
+} else {
+    sessionStore = new FileStore({
+        path: config.session.files,
+        //ttl: moment.duration(config.session.lifetime, 'minutes').asSeconds()
+        ttl: 60,
+        reapInterval: moment.duration(15, 'minutes').asSeconds()
+    });
+}
 
 const httpCallbacks = {
     GET: app.get.bind(app),
@@ -52,6 +66,10 @@ app.listen(config.port, async () => {
     
     // Initialize database
     DB.init();
+
+    if (!fs.existsSync(path.join(__dirname, 'storage/sessions'))) {
+        fs.mkdirSync(path.join(__dirname, 'storage/sessions'));
+    }
     
     // Initialize controllers
     config.controllers.forEach(controllerCls => {

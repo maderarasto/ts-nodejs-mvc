@@ -3,7 +3,7 @@ import { DatabaseCredentials } from "./database/DB";
 import { ControllerClass, Route } from './controllers/Controller';
 import IndexController from './controllers/IndexController';
 import { getenv } from './utils';
-import moment from 'moment';
+import path from 'path';
 
 dotenv.config();
 
@@ -16,6 +16,8 @@ type AppConfig = {
     },
 
     session: {
+        driver: 'file' | 'database',
+        files: string,
         secret: string,
         lifetime: number,
     },
@@ -39,6 +41,8 @@ const config: AppConfig = {
     },
 
     session: {
+        driver: getenv('SESSION_DRIVER', 'file') as 'file' | 'database',
+        files: path.join(__dirname, 'storage/sessions'),
         secret: getenv('SESSION_SECRET'),
         lifetime: parseInt(getenv('SESSION_LIFETIME', '120')),
         

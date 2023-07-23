@@ -1,0 +1,5 @@
+# Ignoring uploaded files
+files/
+
+# Ignoring created sessions
+sessions/
