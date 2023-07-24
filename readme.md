@@ -21,9 +21,9 @@ This project was created for purpose to easily create server application with AP
 ✅ Error handling to send error JSON (currenly not for views)<br />
 ✅ Rendering view templates using LiquidJS<br />
 ✅ Authenticating user<br />
+✅ Session storage through file or databas driver<br />
 
 #### In development
-⌛ Adding session storage<br />
 ⌛ Authenticating via JWT tokens<br />
 ⌛ Validating input from requests<br />
 ⌛ Defining JSON responses based on model<br />
