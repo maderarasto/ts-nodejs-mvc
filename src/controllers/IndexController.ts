@@ -4,6 +4,15 @@ import User from '../models/User';
 import { AuthService } from '../services';
 
 export default class IndexController extends Controller {
+    /**
+     *
+     */
+    constructor() {
+        super({
+            guard: 'auth'
+        });
+    }
+
     async index(req: Request, res: Response) {
         
 

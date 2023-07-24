@@ -14,6 +14,10 @@ export default class AuthService {
     private constructor() {
 
     }
+    
+    static isAuthenticated(session: Session): boolean {
+        return session.userId !== undefined;
+    }
 
     static async getUser(session: Session): Promise<User|null> {
         if (!session.userId) {

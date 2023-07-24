@@ -62,10 +62,16 @@ export class Response {
     }
 }
 
+type Guard = ('auth' | 'guest');
+
+type ControllerOptions = {
+    guard?: Guard
+};
+
 export default abstract class Controller extends Object {
     private _response?: ExpressResponse;
 
-    constructor() {
+    constructor(private options: ControllerOptions = {}) {
         super();
     }
 
