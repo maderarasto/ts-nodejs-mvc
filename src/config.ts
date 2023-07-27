@@ -4,6 +4,7 @@ import { ControllerClass, Route } from './controllers/Controller';
 import IndexController from './controllers/IndexController';
 import { getenv } from './utils';
 import path from 'path';
+import { MiddlewareClass } from './middlewares/Middleware';
 
 dotenv.config();
 
@@ -24,7 +25,8 @@ type AppConfig = {
 
     controllers: ControllerClass[],
     routes: Route[],
-    middlewares: [],
+    middlewares: MiddlewareClass[],
+    routeMiddlewares: Record<string, MiddlewareClass>,
 };
 
 const config: AppConfig = {
@@ -56,7 +58,10 @@ const config: AppConfig = {
         { path: '/', method: 'GET', controller: IndexController, action: 'index' }
     ],
 
-    middlewares: []
+    middlewares: [],
+    routeMiddlewares: {
+        
+    }
 }
 
 export default config;

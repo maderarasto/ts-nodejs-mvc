@@ -47,12 +47,12 @@ export default class App {
 
     private app: express.Express;
     private controllers: Map<string, Controller>;
-    private middlewares: Map<string, Middleware>;
+    private middlewares: Middleware[];
 
     private constructor() {
         this.app = express();
         this.controllers = new Map();
-        this.middlewares = new Map();
+        this.middlewares = [];
 
         // Set up render engine
         this.app.engine('liquid', new Liquid().express());
@@ -78,7 +78,7 @@ export default class App {
         }
 
         config.controllers.forEach(controllerCls => {
-            const controller = new controllerCls();
+            const controller = new controllerCls(this);
 
             // TODO: process controller
 
@@ -126,6 +126,14 @@ export default class App {
         }
 
         try {
+            const blocked = this.middlewares.some((middleware) => {
+                return !middleware.handle(req, res);
+            });
+
+            if (blocked) {
+                return;
+            }
+
             await controller.call(route.action, req, res);
         } catch (err) {
             new ErrorHandler().handle(err as Error, res);
