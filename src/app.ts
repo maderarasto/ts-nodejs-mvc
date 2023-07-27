@@ -26,18 +26,18 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 export default class App {
     private static readonly SESSION_STORES: Record<SessionDriver, Store> = {
         file: new FileStore({
+            path: config.session.files,
+            //ttl: moment.duration(config.session.lifetime, 'minutes').asSeconds()
+            ttl: 60,
+            reapInterval: moment.duration(15, 'minutes').asSeconds()
+        }),
+
+        database: new MySQLStore({
             host: config.database.credentials.host,
             user: config.database.credentials.user,
             pass: config.database.credentials.password,
             database: config.database.credentials.database,
             expiration: moment.duration(config.session.lifetime, 'minutes').asMilliseconds(),
-        }),
-
-        database: new MySQLStore({
-            path: config.session.files,
-            //ttl: moment.duration(config.session.lifetime, 'minutes').asSeconds()
-            ttl: 60,
-            reapInterval: moment.duration(15, 'minutes').asSeconds()
         })
     };
 
