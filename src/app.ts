@@ -104,26 +104,13 @@ export default class App {
     }
 
     private getExpressCallback(method: HttpMethod): Function {
-        let callback: Function;
+        const callbackKey = method.toLowerCase() ?? '';
 
-        switch (method) {
-            case 'POST':
-                callback = this.app.post;
-                break;
-            case 'PUT':
-                callback = this.app.put;
-                break;
-            case 'PATCH':
-                callback = this.app.patch;
-                break;
-            case 'DELETE':
-                callback = this.app.delete;
-                break;
-            default:
-                callback = this.app.get;
-                break;
+        if (!Reflect.has(this.app, callbackKey)) {
+            throw new Error('Given function doesn\'t exist on express applicaiton object!');
         }
 
+        const callback = Reflect.get(this.app, method.toLowerCase()) as Function;
         return callback.bind(this.app);
     }
 
