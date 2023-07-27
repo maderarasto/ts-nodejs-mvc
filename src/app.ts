@@ -1,17 +1,15 @@
-import express from 'express';
-import { Liquid } from 'liquidjs';
-import session, { Store } from 'express-session';
+import express, { Request as ExpressRequest, Response as ExpressResponse } from 'express';
 import moment from 'moment';
-import fs from 'fs';
 import path from 'path';
+import fs from 'fs';
+
+import session, { Store } from 'express-session';
+import { Liquid } from 'liquidjs';
+import config from './config';
 
 import DB from './database/DB';
-import config from './config';
-import { ErrorHandler, getenv } from './utils';
-import { existsSync } from 'fs';
-
-const app = express();
-const engine = new Liquid();
+import Controller, { Route } from './controllers/Controller';
+import { ErrorHandler } from './utils';
 
 declare module 'express-session' {
     interface SessionData {
@@ -19,83 +17,136 @@ declare module 'express-session' {
     }
 }
 
-const MySQLStore = require('express-mysql-session')(session);
 const FileStore = require('session-file-store')(session);
+const MySQLStore = require('express-mysql-session')(session);
 
-let sessionStore: Store;
+type SessionDriver = 'file' | 'database';
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
-if (config.session.driver === 'database') {
-    sessionStore = new MySQLStore({
-        host: config.database.credentials.host,
-        user: config.database.credentials.user,
-        pass: config.database.credentials.password,
-        database: config.database.credentials.database,
-        expiration: moment.duration(config.session.lifetime, 'minutes').asMilliseconds(),
-    });
-} else {
-    sessionStore = new FileStore({
-        path: config.session.files,
-        //ttl: moment.duration(config.session.lifetime, 'minutes').asSeconds()
-        ttl: 60,
-        reapInterval: moment.duration(15, 'minutes').asSeconds()
-    });
-}
+export default class App {
+    private static readonly SESSION_STORES: Record<SessionDriver, Store> = {
+        file: new FileStore({
+            host: config.database.credentials.host,
+            user: config.database.credentials.user,
+            pass: config.database.credentials.password,
+            database: config.database.credentials.database,
+            expiration: moment.duration(config.session.lifetime, 'minutes').asMilliseconds(),
+        }),
 
-const httpCallbacks = {
-    GET: app.get.bind(app),
-    POST: app.post.bind(app),
-    PUT: app.put.bind(app),
-    PATCH: app.patch.bind(app),
-    DELETE: app.delete.bind(app)
-};
+        database: new MySQLStore({
+            path: config.session.files,
+            //ttl: moment.duration(config.session.lifetime, 'minutes').asSeconds()
+            ttl: 60,
+            reapInterval: moment.duration(15, 'minutes').asSeconds()
+        })
+    };
 
-app.engine('liquid', engine.express());
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'liquid');
 
-// Set up sessions
-app.use(session({
-    store: sessionStore,
-    secret: config.session.secret,
-    saveUninitialized: true,
-    resave: false
-}));
+    private static instance: App;
 
-app.listen(config.port, async () => {
-    console.log(`App is listening on port ${config.port}...`);
-    
-    // Initialize database
-    DB.init();
+    private app: express.Express;
+    private controllers: Map<string, Controller>;
 
-    if (!fs.existsSync(path.join(__dirname, 'storage/sessions'))) {
-        fs.mkdirSync(path.join(__dirname, 'storage/sessions'));
+    private constructor() {
+        this.app = express();
+        this.controllers = new Map();
+
+        // Set up render engine
+        this.app.engine('liquid', new Liquid().express());
+        this.app.set('views', path.join(__dirname, 'views'));
+        this.app.set('view engine', 'liquid');
+
+        // Set up sessions
+        this.app.use(session({
+            store: App.SESSION_STORES[config.session.driver],
+            secret: config.session.secret,
+            saveUninitialized: true,
+            resave: false
+        }))
     }
-    
-    // Initialize controllers
-    config.controllers.forEach(controllerCls => {
-        const controller = new controllerCls();
 
-        // Process controller
+    public start() {
+        DB.init();
 
-        // Bind routes to controller
-        const controllerRoutes = config.routes.filter(
-            ({controller}) => controller === controllerCls
-        );
-        
-        controllerRoutes.forEach(route => {
-            if (!httpCallbacks.hasOwnProperty(route.method)) {
-                return;
+        if (config.session.driver === 'file') {
+            if (!fs.existsSync(path.join(__dirname, 'storage/sessions'))) {
+                fs.mkdirSync(path.join(__dirname, 'storage/sessions'));
             }
+        }
 
-            httpCallbacks[route.method](route.path, async (req, res) => {
-                //res.setHeader('Content-Type', 'application/json');
+        config.controllers.forEach(controllerCls => {
+            const controller = new controllerCls();
 
-                try {
-                    await controller.call(route.action, req, res);
-                } catch (err) {
-                    new ErrorHandler().handle(err as Error, res);
+            // TODO: process controller
+
+            // Bind routes to controller methods
+            const controllerRoutes = config.routes.filter(
+                ({controller}) => controller === controllerCls
+            );
+
+            controllerRoutes.forEach(route => {
+                const expressCall = this.getExpressCallback(route.method);
+
+                if (!expressCall) {
+                    // TODO: Warn about no express action
+                    return;
                 }
+
+                expressCall(route.path, this.handleRequest.bind(this, route));
             });
+
+            this.controllers.set(controllerCls.name, controller);
         });
-    });
-});    
+
+        this.app.listen(config.port, () => {
+            console.log(`App is listening on port ${config.port}...`);
+        })
+    }
+
+    private getExpressCallback(method: HttpMethod): Function {
+        let callback: Function;
+
+        switch (method) {
+            case 'POST':
+                callback = this.app.post;
+                break;
+            case 'PUT':
+                callback = this.app.put;
+                break;
+            case 'PATCH':
+                callback = this.app.patch;
+                break;
+            case 'DELETE':
+                callback = this.app.delete;
+                break;
+            default:
+                callback = this.app.get;
+                break;
+        }
+
+        return callback.bind(this.app);
+    }
+
+    private async handleRequest(route: Route, req: ExpressRequest, res: ExpressResponse) {
+        const controller = this.controllers.get(route.controller.name);
+
+        if (!controller) {
+            // TODO: warn about not found controller
+            return;
+        }
+
+        try {
+            await controller.call(route.action, req, res);
+        } catch (err) {
+            new ErrorHandler().handle(err as Error, res);
+        }
+    }
+
+    public static get(): App {
+        if (!App.instance) {
+            App.instance = new App();
+        }
+
+        return App.instance;
+    }
+}
