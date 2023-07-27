@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "npx ts-node src/index.ts",
-    "initdb": "npx ts-node src/initdb.ts",
+    "initdb": "npx ts-node src/scripts/initdb.ts",
     "lint": "eslint . --fix"
   },
   "keywords": [],

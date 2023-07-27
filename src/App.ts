@@ -9,6 +9,7 @@ import config from './config';
 
 import DB from './database/DB';
 import Controller, { Route } from './controllers/Controller';
+import Middleware from './middlewares/Middleware';
 import { ErrorHandler } from './utils';
 
 declare module 'express-session' {
@@ -46,10 +47,12 @@ export default class App {
 
     private app: express.Express;
     private controllers: Map<string, Controller>;
+    private middlewares: Map<string, Middleware>;
 
     private constructor() {
         this.app = express();
         this.controllers = new Map();
+        this.middlewares = new Map();
 
         // Set up render engine
         this.app.engine('liquid', new Liquid().express());

@@ -1,7 +1,8 @@
 import { Request, Response as ExpressResponse, CookieOptions } from "express";
+import App from "../App";
 
 export type ControllerClass = { 
-    new (): Controller 
+    new (app: App): Controller 
 };
 
 export type Route = {
@@ -10,7 +11,6 @@ export type Route = {
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
     controller: ControllerClass,
     action: string,
-    guard?: string
 }
 
 export type ErrorResponse = {
@@ -62,16 +62,10 @@ export class Response {
     }
 }
 
-type Guard = ('auth' | 'guest');
-
-type ControllerOptions = {
-    guard?: Guard
-};
-
 export default abstract class Controller extends Object {
     private _response?: ExpressResponse;
 
-    constructor(private options: ControllerOptions = {}) {
+    constructor(private app: App) {
         super();
     }
 

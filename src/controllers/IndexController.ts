@@ -1,19 +1,16 @@
-import { Request, Response } from 'express'
+import { Request } from 'express'
 import Controller from "./Controller";
-import User from '../models/User';
-import { AuthService } from '../services';
+import App from '../App';
 
 export default class IndexController extends Controller {
     /**
      *
      */
-    constructor() {
-        super({
-            guard: 'auth'
-        });
+    constructor(app: App) {
+        super(app);
     }
 
-    async index(req: Request, res: Response) {
+    async index(req: Request) {
         
 
         this.response.render('home', {
