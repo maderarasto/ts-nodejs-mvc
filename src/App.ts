@@ -11,6 +11,7 @@ import DB from './database/DB';
 import Controller, { Route } from './controllers/Controller';
 import Middleware from './middlewares/Middleware';
 import { ErrorHandler } from './utils';
+import { Service } from './services';
 
 declare module 'express-session' {
     interface SessionData {
@@ -23,6 +24,7 @@ const MySQLStore = require('express-mysql-session')(session);
 
 type SessionDriver = 'file' | 'database';
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+type AppComponent = 'service';
 
 export default class App {
     private static readonly SESSION_STORES: Record<SessionDriver, Store> = {
@@ -47,11 +49,13 @@ export default class App {
 
     private app: express.Express;
     private controllers: Map<string, Controller>;
+    private services: Map<string, Service>;
     private middlewares: Middleware[];
 
     private constructor() {
         this.app = express();
         this.controllers = new Map();
+        this.services = new Map();
         this.middlewares = [];
 
         // Set up render engine
@@ -68,6 +72,16 @@ export default class App {
         }))
     }
 
+    public getComponent(type: AppComponent, name: string) {
+        let component = null;
+
+        if (type === 'service' && this.services.has(name)) {
+            component = this.services.get(name);
+        }
+
+        return component;
+    }
+
     public start() {
         DB.init();
 
@@ -76,6 +90,16 @@ export default class App {
                 fs.mkdirSync(path.join(__dirname, 'storage/sessions'));
             }
         }
+
+        config.services.forEach(serviceCls => {
+            const service = new serviceCls(this);
+
+            // TODO: process service
+
+            this.services.set(serviceCls.name, service);
+        });
+
+        console.log(this.getComponent('service', 'AuthService'));
 
         config.controllers.forEach(controllerCls => {
             const controller = new controllerCls(this);
