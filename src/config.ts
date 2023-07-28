@@ -5,6 +5,8 @@ import IndexController from './controllers/IndexController';
 import { getenv } from './utils';
 import path from 'path';
 import { MiddlewareClass } from './middlewares/Middleware';
+import { ServiceClass } from './services/Service';
+import { AuthService } from './services';
 
 dotenv.config();
 
@@ -25,6 +27,7 @@ type AppConfig = {
 
     controllers: ControllerClass[],
     routes: Route[],
+    services: ServiceClass[],
     middlewares: MiddlewareClass[],
     routeMiddlewares: Record<string, MiddlewareClass>,
 };
@@ -56,6 +59,10 @@ const config: AppConfig = {
 
     routes: [
         { path: '/', method: 'GET', controller: IndexController, action: 'index' }
+    ],
+
+    services: [
+        AuthService
     ],
 
     middlewares: [],

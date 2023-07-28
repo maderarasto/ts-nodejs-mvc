@@ -1,6 +1,8 @@
 import { Session as ExpressSession, SessionData } from "express-session";
 
+import Service from './Service';
 import User from "../models/User";
+import App from "../App";
 import crypto from 'crypto';
 
 type Session = ExpressSession & Partial<SessionData>
@@ -10,16 +12,16 @@ export type UserCredentials = {
     password: string
 };
 
-export default class AuthService {
-    private constructor() {
-
+export default class AuthService extends Service {
+    constructor(app: App) {
+        super(app);
     }
     
-    static isAuthenticated(session: Session): boolean {
+    isAuthenticated(session: Session): boolean {
         return session.userId !== undefined;
     }
 
-    static async getUser(session: Session): Promise<User|null> {
+    async getUser(session: Session): Promise<User|null> {
         if (!session.userId) {
             return null;
         }
@@ -27,7 +29,7 @@ export default class AuthService {
         return await User.find(session.userId) as User;
     }
 
-    static async authenticate(credentials: UserCredentials, session: Session): Promise<boolean> {
+    async authenticate(credentials: UserCredentials, session: Session): Promise<boolean> {
         const user = await User.findByLogin(credentials.login);
         
         if (!user) {
@@ -44,7 +46,7 @@ export default class AuthService {
         return authenticated;
     }
 
-    static async logout(session: Session): Promise<void> {
+    async logout(session: Session): Promise<void> {
         return new Promise((resolve, reject) => {
             session.destroy(err => {
                 if (err) {
