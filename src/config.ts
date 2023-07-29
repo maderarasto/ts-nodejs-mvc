@@ -3,9 +3,6 @@ import { DatabaseCredentials } from "./database/DB";
 import { Route } from './controllers/Controller';
 import { getenv } from './utils';
 import path from 'path';
-import { MiddlewareClass } from './middlewares/Middleware';
-import { ServiceClass } from './services/Service';
-import { AuthService } from './services';
 
 dotenv.config();
 
@@ -26,10 +23,10 @@ type AppConfig = {
         lifetime: number,
     },
 
+    /**
+     * List of registered routes that can be trigger using controllers
+     */
     routes: Route[],
-    services: ServiceClass[],
-    middlewares: MiddlewareClass[],
-    routeMiddlewares: Record<string, MiddlewareClass>,
 };
 
 const config: AppConfig = {
@@ -56,18 +53,20 @@ const config: AppConfig = {
     },
 
     routes: [
-        { path: '/', method: 'GET', controller: 'IndexController', action: 'index' },
-        { path: 'backoffice/users', method: 'GET', controller: 'Backoffice/UserController', action: 'index'},
+        { 
+            path: '/', 
+            method: 'GET', 
+            controller: 'IndexController', 
+            action: 'index' 
+        },
+        { 
+            path: 'backoffice/users', 
+            method: 'GET', 
+            controller: 'Backoffice/UserController', 
+            action: 
+            'index'
+        },
     ],
-
-    services: [
-        AuthService
-    ],
-
-    middlewares: [],
-    routeMiddlewares: {
-        
-    }
 }
 
 export default config;

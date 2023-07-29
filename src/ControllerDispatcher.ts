@@ -11,16 +11,37 @@ import Controller, { Route } from "./controllers/Controller";
 import config from './config';
 import App from './App';
 
+/**
+ * Represents a factory for instantiating controllers.
+ */
 type ControllerFactory = {
     path: string,
     factory: () => Controller
 };
 
+/**
+ * Represents a dispatcher for creating controllers and dispatching their action based on registered routes.
+ */
 export default class ControllerDispatcher {
+    /**
+     * Name of abstract class for controllers.
+     */
     private static readonly ABSTRACT_CONTROLLER_NAME = 'Controller';
+
+    /**
+     * Extension of controller script files.
+     */
     private static readonly CONTROLLERS_FILE_EXT = '.ts';
+
+    /**
+     * Directory in which are controller files located.
+     */
     private static readonly CONTROLLERS_DIR = path.join(config.srcDir, 'controllers');
 
+    /**
+     * Factory methods for controllers binded by combination of folders and name.
+     * Example of key Backend/UserController is located in controllers/Backend/UserController.ts.
+     */
     private controllerFactories: Map<string, ControllerFactory>;
 
     constructor(private app: App) {
@@ -29,6 +50,14 @@ export default class ControllerDispatcher {
         this.loadControllers();
     }
 
+    /**
+     * Creates a controller for incoming request based on route binded to incoming request.
+     * Also dispatching action registered in config.
+     * 
+     * @param route route binded to request.
+     * @param req data associated with request.
+     * @param res functionality for respoding to user.
+     */
     async dispatch(route: Route, req: ExpressRequest, res: ExpressResponse) {
         if (!this.controllerFactories.has(route.controller)) {
             throw new Error(`Controller '${route.controller}' not found in controllers directory!`);
@@ -53,6 +82,9 @@ export default class ControllerDispatcher {
         await controllerAction.call(controller);
     }
 
+    /**
+     * Load all controllers from controllers directory and store their factory methods in map.
+     */
     private loadControllers() {
         if (!fs.existsSync(ControllerDispatcher.CONTROLLERS_DIR)) {
             throw new Error('Required directory for controllers not found!');
@@ -82,16 +114,12 @@ export default class ControllerDispatcher {
         });
     }
 
-    private resolveControllerFile(filePath: string) {
-        let result = filePath;
-
-        if (os.platform() === 'win32') {
-            result = `file:///${filePath}`;
-        }
-
-        return result;
-    }
-
+    /**
+     * Resolve controller key based on combination of folders and name of controller file.
+     * 
+     * @param controllerFile file path to controller file.
+     * @returns resolved controller key.
+     */
     private resolveControllerKey(controllerFile: string) {
         let controllerKey = controllerFile.replace(ControllerDispatcher.CONTROLLERS_DIR + path.sep, '');
         controllerKey = controllerKey.replaceAll('\\', '/');
@@ -100,6 +128,14 @@ export default class ControllerDispatcher {
         return controllerKey;
     }
 
+    /**
+     * Get all files of given directory. If recursive is set to true then 
+     * it returns also files of all subdirectories.
+     * 
+     * @param dir path to directory.
+     * @param recursive signal for recursive function for subdirectories.
+     * @returns filepaths of found files.
+     */
     private getFiles(dir: string, recursive=false): string[] {
         let dirFiles: string[] = [];
         const dirItems = fs.readdirSync(dir);

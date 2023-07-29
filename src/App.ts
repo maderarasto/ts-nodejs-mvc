@@ -8,12 +8,13 @@ import { Liquid } from 'liquidjs';
 import config from './config';
 
 import DB from './database/DB';
-import Controller, { Route } from './controllers/Controller';
-import Middleware from './middlewares/Middleware';
+import { Route } from './controllers/Controller';
 import { ErrorHandler } from './utils';
-import { Service } from './services';
 import ControllerDispatcher from './ControllerDispatcher';
 
+/**
+ * Represents data that can be stored in session.
+ */
 declare module 'express-session' {
     interface SessionData {
         userId?: number
@@ -25,9 +26,19 @@ const MySQLStore = require('express-mysql-session')(session);
 
 type SessionDriver = 'file' | 'database';
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-type AppComponent = 'service';
 
+/**
+ * Represents a container fo whole application and also it's entry point of application.
+ */
 export default class App {
+    /**
+     * Session store factories based on driver in config.
+     *
+     * @private
+     * @static
+     * @type {Record<SessionDriver, Store>}
+     * @memberof App
+     */
     private static readonly SESSION_STORES: Record<SessionDriver, Store> = {
         file: new FileStore({
             path: config.session.files,
@@ -45,17 +56,19 @@ export default class App {
         })
     };
 
-
-    private static instance: App;
-
+    /**
+     * Express application that handle incoming connections
+     */
     private app: express.Express;
+
+    /**
+     * Dispatcher that creates controller based on route and is responsible for calling controller's action.
+     */
     private controllerDispatcher: ControllerDispatcher;
-    private middlewares: Middleware[];
 
     constructor() {
         this.app = express();
         this.controllerDispatcher = new ControllerDispatcher(this);
-        this.middlewares = [];
 
         // Set up render engine
         this.app.engine('liquid', new Liquid().express());
@@ -81,6 +94,9 @@ export default class App {
     //     return component;
     // }
 
+    /**
+     * Initialize components of application and start listening for incoming connections.
+     */
     public start() {
         DB.init();
 
@@ -97,7 +113,7 @@ export default class App {
                 routePath = '/' + routePath;
             }
 
-            const expressCallback = this.getExpressCallback(route.method);
+            const expressCallback = this.resolveExpressCallback(route.method);
             expressCallback(routePath, this.handleRequest.bind(this, route));
         });
 
@@ -110,7 +126,13 @@ export default class App {
         })
     }
 
-    private getExpressCallback(method: HttpMethod): Function {
+    /**
+     * Resolves an appropriate callback for handling connection bassed on HTTP method.
+     * 
+     * @param method type of http method
+     * @returns callback for handling HTTP request
+     */
+    private resolveExpressCallback(method: HttpMethod): Function {
         const callbackKey = method.toLowerCase() ?? '';
 
         if (!Reflect.has(this.app, callbackKey)) {
@@ -121,6 +143,13 @@ export default class App {
         return callback.bind(this.app);
     }
 
+    /**
+     * Handle an incoming request and with controller dispatcher triggers appropriate controller action.
+     * 
+     * @param route route binded to incoming request
+     * @param req associated data with request
+     * @param res associated data with response
+     */
     private async handleRequest(route: Route, req: ExpressRequest, res: ExpressResponse) {
         try {
             await this.controllerDispatcher.dispatch(route, req, res);
