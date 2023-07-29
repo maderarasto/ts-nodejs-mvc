@@ -54,7 +54,7 @@ export default class App {
 
     constructor() {
         this.app = express();
-        this.controllerDispatcher = new ControllerDispatcher();
+        this.controllerDispatcher = new ControllerDispatcher(this);
         this.middlewares = [];
 
         // Set up render engine

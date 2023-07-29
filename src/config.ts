@@ -13,6 +13,8 @@ dotenv.config();
 type AppConfig = {
     name: string,
     port: number,
+    rootDir: string,
+    srcDir: string
     
     database: {
         credentials: DatabaseCredentials
@@ -35,6 +37,8 @@ type AppConfig = {
 const config: AppConfig = {
     name: getenv('APP_NAME'),
     port: parseInt(getenv('APP_PORT', '3000')),
+    rootDir: path.dirname(__dirname),
+    srcDir: __dirname,
 
     database: {
         credentials: {
