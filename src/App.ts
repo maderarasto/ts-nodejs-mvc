@@ -101,6 +101,10 @@ export default class App {
             expressCallback(routePath, this.handleRequest.bind(this, route));
         });
 
+        this.app.all('*', (req, res) => {
+            res.render('error');
+        });
+
         this.app.listen(config.port, () => {
             console.log(`App is listening on port ${config.port}...`);
         })
