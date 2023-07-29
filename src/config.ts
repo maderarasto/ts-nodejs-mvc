@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 import { DatabaseCredentials } from "./database/DB";
-import { ControllerClass, Route } from './controllers/Controller';
-import IndexController from './controllers/IndexController';
+import { Route } from './controllers/Controller';
 import { getenv } from './utils';
 import path from 'path';
 import { MiddlewareClass } from './middlewares/Middleware';
@@ -27,7 +26,6 @@ type AppConfig = {
         lifetime: number,
     },
 
-    controllers: ControllerClass[],
     routes: Route[],
     services: ServiceClass[],
     middlewares: MiddlewareClass[],
@@ -57,12 +55,9 @@ const config: AppConfig = {
         
     },
 
-    controllers: [
-        IndexController
-    ],
-
     routes: [
-        { path: '/', method: 'GET', controller: IndexController, action: 'index' }
+        { path: '/', method: 'GET', controller: 'IndexController', action: 'index' },
+        { path: 'backoffice/users', method: 'GET', controller: 'Backoffice/UserController', action: 'index'},
     ],
 
     services: [

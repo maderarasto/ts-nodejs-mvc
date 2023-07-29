@@ -90,42 +90,38 @@ export default class App {
             }
         }
 
+        config.routes.forEach(route => {
+            let routePath = route.path;
+
+            if (routePath.charAt(0) !== '/') {
+                routePath = '/' + routePath;
+            }
+
+            const expressCallback = this.getExpressCallback(route.method);
+            expressCallback(routePath, this.handleRequest.bind(this, route));
+        });
+
         this.app.listen(config.port, () => {
             console.log(`App is listening on port ${config.port}...`);
         })
     }
 
-    // private getExpressCallback(method: HttpMethod): Function {
-    //     const callbackKey = method.toLowerCase() ?? '';
+    private getExpressCallback(method: HttpMethod): Function {
+        const callbackKey = method.toLowerCase() ?? '';
 
-    //     if (!Reflect.has(this.app, callbackKey)) {
-    //         throw new Error('Given function doesn\'t exist on express applicaiton object!');
-    //     }
+        if (!Reflect.has(this.app, callbackKey)) {
+            throw new Error('Given function doesn\'t exist on express applicaiton object!');
+        }
 
-    //     const callback = Reflect.get(this.app, method.toLowerCase()) as Function;
-    //     return callback.bind(this.app);
-    // }
+        const callback = Reflect.get(this.app, method.toLowerCase()) as Function;
+        return callback.bind(this.app);
+    }
 
-    // private async handleRequest(route: Route, req: ExpressRequest, res: ExpressResponse) {
-    //     const controller = this.controllers.get(route.controller.name);
-
-    //     if (!controller) {
-    //         // TODO: warn about not found controller
-    //         return;
-    //     }
-
-    //     try {
-    //         const blocked = this.middlewares.some((middleware) => {
-    //             return !middleware.handle(req, res);
-    //         });
-
-    //         if (blocked) {
-    //             return;
-    //         }
-
-    //         await controller.call(route.action, req, res);
-    //     } catch (err) {
-    //         new ErrorHandler().handle(err as Error, res);
-    //     }
-    // }
+    private async handleRequest(route: Route, req: ExpressRequest, res: ExpressResponse) {
+        try {
+            await this.controllerDispatcher.dispatch(route, req, res);
+        } catch (err) {
+            new ErrorHandler().handle(err as Error, res);
+        }
+    }
 }

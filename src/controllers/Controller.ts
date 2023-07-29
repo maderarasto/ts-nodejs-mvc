@@ -1,15 +1,16 @@
-import { Request, Response as ExpressResponse, CookieOptions } from "express";
-import App from "../App";
+import { 
+    Request as ExpressRequest, 
+    Response as ExpressResponse, 
+    CookieOptions 
+} from "express";
 
-export type ControllerClass = { 
-    new (app: App): Controller 
-};
+import App from "../App";
 
 export type Route = {
     path: string,
     name?: string,
     method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
-    controller: ControllerClass,
+    controller: string,
     action: string,
 }
 
@@ -64,24 +65,22 @@ export class Response {
 
 export default abstract class Controller extends Object {
     private _response?: ExpressResponse;
+    private _request?: ExpressRequest;
 
-    constructor(private app: App) {
+    constructor() {
         super();
     }
 
-    async call(action: string, req: Request, res: ExpressResponse) {
+    setRequest(req: ExpressRequest) {
+        this._request = req;
+    }
+
+    setResponse(res: ExpressResponse) {
         this._response = res;
+    }
 
-        if (!Reflect.has(this, action)) {
-            this._response = undefined;
-            throw new Error(`Action ${action} doesn't exists on controller ${this.constructor.name}!`);
-        }
-
-        const func = Reflect.get(this, action) as Function;
-        await func.call(this, req);        
-        
-        this._response = undefined;
-        console.log(res);
+    protected get request(): ExpressRequest {
+        return this._request as ExpressRequest;
     }
 
     protected get response(): Response {

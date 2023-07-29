@@ -13,7 +13,7 @@ import App from './App';
 
 type ControllerFactory = {
     path: string,
-    factory: () => Promise<Controller>
+    factory: () => Controller
 };
 
 export default class ControllerDispatcher {
@@ -29,8 +29,28 @@ export default class ControllerDispatcher {
         this.loadControllers();
     }
 
-    dispatch(route: Route, req: ExpressRequest, res: ExpressResponse) {
+    async dispatch(route: Route, req: ExpressRequest, res: ExpressResponse) {
+        if (!this.controllerFactories.has(route.controller)) {
+            throw new Error(`Controller '${route.controller}' not found in controllers directory!`);
+        }
 
+        const controller = this.controllerFactories.get(route.controller)?.factory();
+
+        if (!controller) {
+            throw new Error('Error occured during creating a controller instance');
+        }
+
+        controller.setRequest(req);
+        controller.setResponse(res);
+
+        // TODO: handle all middlewares
+
+        if (!Reflect.has(controller, route.action)) {
+            throw new Error(`Action '${route.action}' not found in controller '${controller.constructor.name}'`);
+        }
+
+        const controllerAction = Reflect.get(controller, route.action) as Function;
+        await controllerAction.call(controller);
     }
 
     private loadControllers() {
@@ -52,9 +72,9 @@ export default class ControllerDispatcher {
             const controllerKey = this.resolveControllerKey(controllerFile);
             const controllerFactory: ControllerFactory = {
                 path: controllerFile,
-                factory: async () => {
+                factory: () => {
                     const controllerCls = require(controllerFile).default;
-                    return new controllerCls(this.app)                    ;
+                    return new controllerCls();
                 }
             };
             

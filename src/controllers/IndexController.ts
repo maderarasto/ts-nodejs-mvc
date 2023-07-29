@@ -6,15 +6,15 @@ export default class IndexController extends Controller {
     /**
      *
      */
-    constructor(app: App) {
-        super(app);
+    constructor() {
+        super();
     }
 
-    async index(req: Request) {
+    async index() {
         
 
         this.response.render('home', {
-            userId: req.session.userId
+            userId: this.request.session.userId
         });
     }
 }
