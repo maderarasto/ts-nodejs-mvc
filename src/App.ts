@@ -12,6 +12,7 @@ import Controller, { Route } from './controllers/Controller';
 import Middleware from './middlewares/Middleware';
 import { ErrorHandler } from './utils';
 import { Service } from './services';
+import ControllerDispatcher from './ControllerDispatcher';
 
 declare module 'express-session' {
     interface SessionData {
@@ -48,14 +49,12 @@ export default class App {
     private static instance: App;
 
     private app: express.Express;
-    private controllers: Map<string, Controller>;
-    private services: Map<string, Service>;
+    private controllerDispatcher: ControllerDispatcher;
     private middlewares: Middleware[];
 
-    private constructor() {
+    constructor() {
         this.app = express();
-        this.controllers = new Map();
-        this.services = new Map();
+        this.controllerDispatcher = new ControllerDispatcher();
         this.middlewares = [];
 
         // Set up render engine
@@ -72,15 +71,15 @@ export default class App {
         }))
     }
 
-    public getComponent(type: AppComponent, name: string) {
-        let component = null;
+    // public getComponent(type: AppComponent, name: string) {
+    //     let component = null;
 
-        if (type === 'service' && this.services.has(name)) {
-            component = this.services.get(name);
-        }
+    //     if (type === 'service' && this.services.has(name)) {
+    //         component = this.services.get(name);
+    //     }
 
-        return component;
-    }
+    //     return component;
+    // }
 
     public start() {
         DB.init();
@@ -91,84 +90,42 @@ export default class App {
             }
         }
 
-        config.services.forEach(serviceCls => {
-            const service = new serviceCls(this);
-
-            // TODO: process service
-
-            this.services.set(serviceCls.name, service);
-        });
-
-        console.log(this.getComponent('service', 'AuthService'));
-
-        config.controllers.forEach(controllerCls => {
-            const controller = new controllerCls(this);
-
-            // TODO: process controller
-
-            // Bind routes to controller methods
-            const controllerRoutes = config.routes.filter(
-                ({controller}) => controller === controllerCls
-            );
-
-            controllerRoutes.forEach(route => {
-                const expressCall = this.getExpressCallback(route.method);
-
-                if (!expressCall) {
-                    // TODO: Warn about no express action
-                    return;
-                }
-
-                expressCall(route.path, this.handleRequest.bind(this, route));
-            });
-
-            this.controllers.set(controllerCls.name, controller);
-        });
-
         this.app.listen(config.port, () => {
             console.log(`App is listening on port ${config.port}...`);
         })
     }
 
-    private getExpressCallback(method: HttpMethod): Function {
-        const callbackKey = method.toLowerCase() ?? '';
+    // private getExpressCallback(method: HttpMethod): Function {
+    //     const callbackKey = method.toLowerCase() ?? '';
 
-        if (!Reflect.has(this.app, callbackKey)) {
-            throw new Error('Given function doesn\'t exist on express applicaiton object!');
-        }
+    //     if (!Reflect.has(this.app, callbackKey)) {
+    //         throw new Error('Given function doesn\'t exist on express applicaiton object!');
+    //     }
 
-        const callback = Reflect.get(this.app, method.toLowerCase()) as Function;
-        return callback.bind(this.app);
-    }
+    //     const callback = Reflect.get(this.app, method.toLowerCase()) as Function;
+    //     return callback.bind(this.app);
+    // }
 
-    private async handleRequest(route: Route, req: ExpressRequest, res: ExpressResponse) {
-        const controller = this.controllers.get(route.controller.name);
+    // private async handleRequest(route: Route, req: ExpressRequest, res: ExpressResponse) {
+    //     const controller = this.controllers.get(route.controller.name);
 
-        if (!controller) {
-            // TODO: warn about not found controller
-            return;
-        }
+    //     if (!controller) {
+    //         // TODO: warn about not found controller
+    //         return;
+    //     }
 
-        try {
-            const blocked = this.middlewares.some((middleware) => {
-                return !middleware.handle(req, res);
-            });
+    //     try {
+    //         const blocked = this.middlewares.some((middleware) => {
+    //             return !middleware.handle(req, res);
+    //         });
 
-            if (blocked) {
-                return;
-            }
+    //         if (blocked) {
+    //             return;
+    //         }
 
-            await controller.call(route.action, req, res);
-        } catch (err) {
-            new ErrorHandler().handle(err as Error, res);
-        }
-    }
-
-    public static get(): App {
-        if (!App.instance) {
-            App.instance = new App();
-        }
-
-        return App.instance;
-    }
+    //         await controller.call(route.action, req, res);
+    //     } catch (err) {
+    //         new ErrorHandler().handle(err as Error, res);
+    //     }
+    // }
 }

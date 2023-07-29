@@ -1,4 +1,4 @@
 import App from "./App";
 
-const app = App.get();
+const app = new App;
 app.start();
