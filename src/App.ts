@@ -11,6 +11,7 @@ import DB from './database/DB';
 import { Route } from './controllers/Controller';
 import { ErrorHandler } from './utils';
 import ControllerDispatcher from './ControllerDispatcher';
+import ServiceManager from './ServiceManager';
 
 /**
  * Represents data that can be stored in session.
@@ -33,11 +34,6 @@ type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 export default class App {
     /**
      * Session store factories based on driver in config.
-     *
-     * @private
-     * @static
-     * @type {Record<SessionDriver, Store>}
-     * @memberof App
      */
     private static readonly SESSION_STORES: Record<SessionDriver, Store> = {
         file: new FileStore({
@@ -65,9 +61,11 @@ export default class App {
      * Dispatcher that creates controller based on route and is responsible for calling controller's action.
      */
     private controllerDispatcher: ControllerDispatcher;
+    private serviceManager: ServiceManager;
 
     constructor() {
         this.app = express();
+        this.serviceManager = new ServiceManager();
         this.controllerDispatcher = new ControllerDispatcher(this);
 
         // Set up render engine
@@ -82,6 +80,10 @@ export default class App {
             saveUninitialized: true,
             resave: false
         }))
+    }
+
+    public getServiceManager() {
+        return this.serviceManager;
     }
 
     // public getComponent(type: AppComponent, name: string) {
@@ -105,6 +107,8 @@ export default class App {
                 fs.mkdirSync(path.join(__dirname, 'storage/sessions'));
             }
         }
+
+        console.log(this.serviceManager.getService('AuthService'));
 
         config.routes.forEach(route => {
             let routePath = route.path;

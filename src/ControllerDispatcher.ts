@@ -1,5 +1,4 @@
 import fs from 'fs';
-import os from 'os';
 import path from 'path';
 
 import {
@@ -8,16 +7,9 @@ import {
 } from 'express';
 
 import Controller, { Route } from "./controllers/Controller";
+import { FileSystem } from './utils';
 import config from './config';
 import App from './App';
-
-/**
- * Represents a factory for instantiating controllers.
- */
-type ControllerFactory = {
-    path: string,
-    factory: () => Controller
-};
 
 /**
  * Represents a dispatcher for creating controllers and dispatching their action based on registered routes.
@@ -42,7 +34,7 @@ export default class ControllerDispatcher {
      * Factory methods for controllers binded by combination of folders and name.
      * Example of key Backend/UserController is located in controllers/Backend/UserController.ts.
      */
-    private controllerFactories: Map<string, ControllerFactory>;
+    private controllerFactories: Map<string, () => Controller>;
 
     constructor(private app: App) {
         this.controllerFactories = new Map();
@@ -63,7 +55,8 @@ export default class ControllerDispatcher {
             throw new Error(`Controller '${route.controller}' not found in controllers directory!`);
         }
 
-        const controller = this.controllerFactories.get(route.controller)?.factory();
+        const controllerFactory = this.controllerFactories.get(route.controller) as Function;
+        const controller = controllerFactory();
 
         if (!controller) {
             throw new Error('Error occured during creating a controller instance');
@@ -90,7 +83,7 @@ export default class ControllerDispatcher {
             throw new Error('Required directory for controllers not found!');
         }
 
-        const dirFiles = this.getFiles(ControllerDispatcher.CONTROLLERS_DIR, true);
+        const dirFiles = FileSystem.getFiles(ControllerDispatcher.CONTROLLERS_DIR, true);
         const controllerFiles = dirFiles.filter(filePath => {
             const fileExt = path.extname(filePath);
             const fileName = path.basename(filePath);
@@ -102,12 +95,9 @@ export default class ControllerDispatcher {
 
         controllerFiles.forEach(controllerFile => {
             const controllerKey = this.resolveControllerKey(controllerFile);
-            const controllerFactory: ControllerFactory = {
-                path: controllerFile,
-                factory: () => {
-                    const controllerCls = require(controllerFile).default;
-                    return new controllerCls();
-                }
+            const controllerFactory = () => {
+                const controllerCls = require(controllerFile).default;
+                return new controllerCls();
             };
             
             this.controllerFactories.set(controllerKey, controllerFactory);
@@ -126,39 +116,5 @@ export default class ControllerDispatcher {
         controllerKey = controllerKey.replace(ControllerDispatcher.CONTROLLERS_FILE_EXT, '');
 
         return controllerKey;
-    }
-
-    /**
-     * Get all files of given directory. If recursive is set to true then 
-     * it returns also files of all subdirectories.
-     * 
-     * @param dir path to directory.
-     * @param recursive signal for recursive function for subdirectories.
-     * @returns filepaths of found files.
-     */
-    private getFiles(dir: string, recursive=false): string[] {
-        let dirFiles: string[] = [];
-        const dirItems = fs.readdirSync(dir);
-        
-        dirItems.forEach(itemName => {
-            const itemPath = path.join(dir, itemName);
-            const itemStat = fs.statSync(itemPath);
-            //console.log(itemPath, dirFiles);
-
-            if (itemStat.isDirectory()) {
-                if (recursive) {
-                    dirFiles = [
-                        ...dirFiles, 
-                        ...this.getFiles(itemPath, recursive)
-                    ];
-                } 
-
-                return;
-            }
-
-            dirFiles.push(itemPath);
-        });
-
-        return dirFiles;
     }
 }
