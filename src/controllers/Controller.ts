@@ -33,8 +33,8 @@ export class Response {
     constructor(private response: ExpressResponse) {}
 
     /**
-     * Check if response contains an HTTP header.
-     * @param name name of HTTP header
+     * Check if response contains a response header.
+     * @param name name of request header
      * @returns true/false
      */
     hasHeader(name: string): boolean {
@@ -50,9 +50,9 @@ export class Response {
     }
 
     /**
-     * Set an HTTP header
-     * @param name name of HTTP header
-     * @param value value of HTTP header
+     * Set a response header
+     * @param name name of response header
+     * @param value value of response header
      * @returns response object
      */
     header(name: string, value: string) {
