@@ -303,11 +303,10 @@ First you will need to create a new template file in folder `views` with file ty
 ```
 Then you can render your template file in your controller method with controller property `response` and use its method `render` to render your template file. It is necessary to pass name of your template file that you created in `views` folder.
 ```typescript
-import { Request } from 'express'
 import Controller from "./Controller";
 
 export default class IndexController extends Controller {
-    async index(req: Request) {
+    async index() {
         this.response.render('home');
     }
 }
