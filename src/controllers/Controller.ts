@@ -3,6 +3,7 @@ import {
     Response as ExpressResponse, 
     CookieOptions 
 } from "express";
+import Injectable from "../interfaces/Injectable";
 
 /**
  * Represents route of application that are binded to incoming requests.
@@ -109,15 +110,22 @@ export class Response {
     }
 }
 
+export type DIContainer = {
+    [key: string]: Injectable
+}
+
 /**
  * Represents a base controller that offers to access request data and functionality for responding to user.
  */
 export default abstract class Controller extends Object {
     private _response?: ExpressResponse;
     private _request?: ExpressRequest;
+    private _container: DIContainer;
 
-    constructor() {
+    constructor(container: DIContainer = {}) {
         super();
+
+        this._container = container;
     }
 
     /**
@@ -134,6 +142,10 @@ export default abstract class Controller extends Object {
      */
     setResponse(res: ExpressResponse) {
         this._response = res;
+    }
+
+    protected get container(): DIContainer {
+        return this._container;
     }
 
     /**
