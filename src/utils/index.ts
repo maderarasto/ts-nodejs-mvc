@@ -1,4 +1,5 @@
 import { Response } from "express";
+import FileSystem from "./FileSystem";
 // import { ErrorResponse } from "../controllers/Controller";
 
 /**
@@ -31,4 +32,8 @@ export class ErrorHandler {
             <h1>Error ocurred</h1>
         `);
     }
+}
+
+export {
+    FileSystem
 }
