@@ -110,6 +110,9 @@ export class Response {
     }
 }
 
+/**
+ * Represents container for dependency injection.
+ */
 export type DIContainer = {
     [key: string]: Injectable
 }

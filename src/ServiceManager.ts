@@ -2,21 +2,14 @@ import fs from 'fs';
 import path from "path";
 
 import config from "./config";
-import { Service } from './services';
+import { Service } from './interfaces';
 import { FileSystem } from './utils';
 
 export default class ServiceManager extends Object {
     /**
      * Name of abstract class for controllers.
      */
-    private static readonly ABSTRACT_SERVICE_NAME = 'Service';
-
-    /**
-     * List of files that will not be loaded to manager.
-     */
-    private static readonly IGNORED_SCRIPT_FILES = [ 
-        `index.ts`, 
-        `${this.ABSTRACT_SERVICE_NAME}.ts`]
+    private static readonly BASE_SERVICE_NAME = 'Service';
 
     /**
      * Directory in which are controller files located.
@@ -36,6 +29,12 @@ export default class ServiceManager extends Object {
         this.loadServices();
     }
 
+    /**
+     * Get an isntance of service by given key.
+     * 
+     * @param key key of service
+     * @returns instance of service
+     */
     getService(key: string): Service {
         if (!this.serviceFactories.has(key)) {
             throw new Error(`Service '${key}' not found in services directory!`);
@@ -51,9 +50,26 @@ export default class ServiceManager extends Object {
         return service;
     }
 
+    /**
+     * Get instances of all services.
+     * @returns instances of services
+     */
+    getServices(): Map<string, Service> {
+        const services: Map<string, Service> = new Map();
+
+        this.serviceFactories.forEach((serviceFactory, serviceKey) => {
+            services.set(serviceKey, serviceFactory());
+        });
+
+        return services;
+    }
+
+    /**
+     * Loads service factories from directory services.
+     */
     private loadServices() {
         if (!fs.existsSync(ServiceManager.SERVICES_DIR)) {
-            throw new Error('Required directory for controllers not found!');
+            return;
         }
 
         const dirFiles = FileSystem.getFiles(ServiceManager.SERVICES_DIR, true);
@@ -62,8 +78,8 @@ export default class ServiceManager extends Object {
             const fileName = path.basename(filePath);
 
             return fileExt === '.ts' 
-                && fileName.includes(ServiceManager.ABSTRACT_SERVICE_NAME) 
-                && !ServiceManager.IGNORED_SCRIPT_FILES.includes(fileName);
+                && fileName.includes(ServiceManager.BASE_SERVICE_NAME) 
+                && fileName !== `${ServiceManager.BASE_SERVICE_NAME}.ts`;
         });
 
         serviceFiles.forEach(serviceFile => {

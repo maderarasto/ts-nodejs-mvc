@@ -6,7 +6,7 @@ import {
     Response as ExpressResponse
 } from 'express';
 
-import Controller, { Route } from "./controllers/Controller";
+import Controller, { DIContainer, Route } from "./controllers/Controller";
 import { FileSystem } from './utils';
 import config from './config';
 import App from './App';
@@ -34,7 +34,7 @@ export default class ControllerDispatcher {
      * Factory methods for controllers binded by combination of folders and name.
      * Example of key Backend/UserController is located in controllers/Backend/UserController.ts.
      */
-    private controllerFactories: Map<string, () => Controller>;
+    private controllerFactories: Map<string, (container: DIContainer) => Controller>;
 
     constructor(private app: App) {
         this.controllerFactories = new Map();
@@ -55,8 +55,20 @@ export default class ControllerDispatcher {
             throw new Error(`Controller '${route.controller}' not found in controllers directory!`);
         }
 
+        const container: DIContainer = {};
+        const services = this.app.serviceManager.getServices();
+
+        services.forEach((service, serviceKey) => {
+            const injectebleKey = serviceKey.split('/').reduce((carry, current, index) => {
+                const part = index === 0 ? current[0].toLowerCase() + current.substring(1) : current;
+                return carry + part;
+            }, '');
+            
+            container[injectebleKey] = service;
+        });
+
         const controllerFactory = this.controllerFactories.get(route.controller) as Function;
-        const controller = controllerFactory();
+        const controller = controllerFactory(container);
 
         if (!controller) {
             throw new Error('Error occured during creating a controller instance');
@@ -80,7 +92,7 @@ export default class ControllerDispatcher {
      */
     private loadControllers() {
         if (!fs.existsSync(ControllerDispatcher.CONTROLLERS_DIR)) {
-            throw new Error('Required directory for controllers not found!');
+            return;
         }
 
         const dirFiles = FileSystem.getFiles(ControllerDispatcher.CONTROLLERS_DIR, true);
@@ -95,9 +107,9 @@ export default class ControllerDispatcher {
 
         controllerFiles.forEach(controllerFile => {
             const controllerKey = this.resolveControllerKey(controllerFile);
-            const controllerFactory = () => {
+            const controllerFactory = (container: DIContainer) => {
                 const controllerCls = require(controllerFile).default;
-                return new controllerCls();
+                return new controllerCls(container);
             };
             
             this.controllerFactories.set(controllerKey, controllerFactory);

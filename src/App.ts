@@ -61,11 +61,11 @@ export default class App {
      * Dispatcher that creates controller based on route and is responsible for calling controller's action.
      */
     private controllerDispatcher: ControllerDispatcher;
-    private serviceManager: ServiceManager;
+    private _serviceManager: ServiceManager;
 
     constructor() {
         this.app = express();
-        this.serviceManager = new ServiceManager();
+        this._serviceManager = new ServiceManager();
         this.controllerDispatcher = new ControllerDispatcher(this);
 
         // Set up render engine
@@ -82,19 +82,12 @@ export default class App {
         }))
     }
 
-    public getServiceManager() {
-        return this.serviceManager;
+    /**
+     * Get a manager for accessing loaded services.
+     */
+    public get serviceManager() {
+        return this._serviceManager;
     }
-
-    // public getComponent(type: AppComponent, name: string) {
-    //     let component = null;
-
-    //     if (type === 'service' && this.services.has(name)) {
-    //         component = this.services.get(name);
-    //     }
-
-    //     return component;
-    // }
 
     /**
      * Initialize components of application and start listening for incoming connections.
@@ -107,8 +100,6 @@ export default class App {
                 fs.mkdirSync(path.join(__dirname, 'storage/sessions'));
             }
         }
-
-        console.log(this.serviceManager.getService('AuthService'));
 
         config.routes.forEach(route => {
             let routePath = route.path;
@@ -158,6 +149,7 @@ export default class App {
         try {
             await this.controllerDispatcher.dispatch(route, req, res);
         } catch (err) {
+            console.log(err);
             new ErrorHandler().handle(err as Error, res);
         }
     }

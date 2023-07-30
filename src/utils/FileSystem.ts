@@ -1,6 +1,9 @@
 import fs from 'fs';
 import path from 'path';
 
+/**
+ * Represents API for manipulating with filesystem.
+ */
 export default class FileSystem {
     private constructor() {
 

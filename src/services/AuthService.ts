@@ -1,9 +1,8 @@
 import { Session as ExpressSession, SessionData } from "express-session";
 
-import Service from './Service';
 import User from "../models/User";
-import App from "../App";
 import crypto from 'crypto';
+import { Service } from "../interfaces";
 
 type Session = ExpressSession & Partial<SessionData>
 
@@ -12,11 +11,7 @@ export type UserCredentials = {
     password: string
 };
 
-export default class AuthService extends Service {
-    constructor(app: App) {
-        super(app);
-    }
-    
+export default class AuthService implements Service {
     isAuthenticated(session: Session): boolean {
         return session.userId !== undefined;
     }
