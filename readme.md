@@ -234,7 +234,7 @@ await User.deleteMany([1, 2, 3]);
 When we want to trigger a function either from web or API we can use controllers. Methods of controller can be binded with routes in file `config.ts`. So when route is matched then it can trigger an action (controller's method) and run some of your code.
 
 #### Creating your controller
-First you will to create you controller class in `controllers` folder that will be extending from `class Controller` with some methods.
+First you will need to create you controller class in `controllers` folder that will be extending from `class Controller` with some methods.
 
 It is recommended to use action like this:
 - get list of resources with action `index()`
