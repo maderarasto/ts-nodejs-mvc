@@ -1,13 +1,13 @@
-import Controller, { DIContainer } from "./Controller";
+import {Controller, ContainerDI } from "./";
 import { AuthService } from '../services';
 
 export default class IndexController extends Controller {
     private authService: AuthService;
 
-    constructor(container: DIContainer) {
-        super(container);
+    constructor(containerDI: ContainerDI) {
+        super(containerDI);
 
-        this.authService = container.authService as AuthService;
+        this.authService = containerDI.authService as AuthService;
     }
 
     async index() {

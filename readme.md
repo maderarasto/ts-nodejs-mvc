@@ -3,12 +3,19 @@ The project is template for simple [Node.js](https://nodejs.org/en) application 
 
 With [LiquidJS](https://liquidjs.com/) library you can define custom views with additional helper functions that help you write view templates more easily and access to data from controller.The more information about LiquidJS you can find on its authors webiste [https://liquidjs.com](https://liquidjs.com).
 
-**Tags**: [TypeScript](https://www.typescriptlang.org/), [Node.js](https://nodejs.org/en), [MySQL](https://www.mysql.com/), [LiquidJS](https://liquidjs.com/)
+**Tags**: [TypeScript](https://www.typescriptlang.org/), [Node.js](https://nodejs.org/en), [MySQL](https://www.mysql.com/), [LiquidJS](https://liquidjs.com/), Dependency Injection
 ## Table of contents
 1. [Motivation](#motivation)
 2. [State of project](#state-of-project)
 3. [Configuration](#configuration)
 4. [Getting started](#gettings-started)
+    - [Database](#database)
+    - [Models](#models)
+    - [Controllers](#controllers)
+    - [Services](#services)
+    - [Dependency Injection Container](#dependency-injection-container)
+    - [Views](#views)
+    - [Error handling](#error-handling)
 
 ## Motivation
 This project was created for purpose to easily create server application with API for future projects and to apply [Typescript](https://www.typescriptlang.org/) and [Node.js](https://nodejs.org/en) skills.
@@ -224,8 +231,7 @@ await User.delete(1);
 await User.deleteMany([1, 2, 3]);
 ```
 ### Controllers
-When we want to use function trigger either from web or API we can use controllers.
-Methods of controller can be binded with routes in file `config.ts`. So when route is matched then it can trigger action (controller's method) and run some of your code.
+When we want to trigger a function either from web or API we can use controllers. Methods of controller can be binded with routes in file `config.ts`. So when route is matched then it can trigger an action (controller's method) and run some of your code.
 
 #### Creating your controller
 First you will to create you controller class in `controllers` folder that will be extending from `class Controller` with some methods.
@@ -282,8 +288,52 @@ Each controller offers properties for accessing request data through property `r
 In `request` proeprty you can find information about processed request such as url, query, params, body, headers or session data.
 ###### Response
 With `response` property you can manipulate what can be send in response. You can set up headers, cookies, content and subsequently send response with status code.
-
 If you are using render engine you can also render template view by using method `render`.
+### Services
+Your business logic shouldn't be used directly in controllers so you could create your own services and then using them in your controllers.
+#### Creating your service
+First you need to create your service class in `services` folder that will be implmenting `interface Service` with some methods that can be ran in your controller.
+```typescript
+import {Service} from '../interfaces';
+...
+export default class UserService implements Service {
+    ...
+    async getUser(): Promise<User> {
+        ...
+        return user;
+    }
+}
+```
+#### Using your service
+All services located in directory `services` are automatically loaded during app initialization. If your service class implements `interface Service` it also implements `interface Injectable` and services that are injectable can be automatically injected in your controller contructor through parameter `container: ContainerDI` or later in your actions through property `container`. 
+
+To ensure you can use a container with automatically injected services it is necessary to add parameter `container: ContainerDI` to your contructor. And for accessing property `container` you have to pass `container` parameter to parent `class Controller` by calling parent contstructor `super(container)`.
+```typescript
+import Controller, {ContainerDI} from './Controller';
+import {UserService} from '../services';
+
+export default class UserController extends Controller {
+    private userService: UserService;
+    ...
+
+    constructor(container: ContainerDI) {
+        super(container);
+
+        userService = container.userService as UserService;
+    }
+
+    ...
+
+    async index() {
+        this.response.render('users', await userService.getAll());
+    }
+}
+
+```
+### Dependency Injection Container
+All components that implements `interface Injecable` are automatically injected into `ContainerDI` and components can be references by name that is pascal case format in example `UserService` can be referenced using name `container.userService`. 
+
+If a component is namespaced with some folders then folder names are prepended in fron of component name so for example `Backend/UserService` should be referenced using name `container.backendUserService`.
 ### Views
 For the rendering views as response from controller application uses [LiquidJS](https://liquidjs.com) template engine. [LiquidJS](https://liquidjs.com) uses own file types `.liquid` for templates that supports HTML. In template you can use many helper functions such as conditions, for loops, using variables and so on. Detailed information how to use helpers function you can find [on their website](https://liquidjs.com/tags/overview.html).
 #### Rendering template file
