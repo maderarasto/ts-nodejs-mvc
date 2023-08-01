@@ -6,10 +6,10 @@ import {
     Response as ExpressResponse
 } from 'express';
 
-import Controller, { DIContainer, Route } from "./controllers/Controller";
-import { FileSystem } from './utils';
-import config from './config';
-import App from './App';
+import Controller from "../../controllers/Controller";
+import { FileSystem } from '../../utils';
+import config from '../../config';
+import App from '../../App';
 
 /**
  * Represents a dispatcher for creating controllers and dispatching their action based on registered routes.
@@ -34,7 +34,7 @@ export default class ControllerDispatcher {
      * Factory methods for controllers binded by combination of folders and name.
      * Example of key Backend/UserController is located in controllers/Backend/UserController.ts.
      */
-    private controllerFactories: Map<string, (container: DIContainer) => Controller>;
+    private controllerFactories: Map<string, (container: Routing.ContainerDI) => Controller>;
 
     constructor(private app: App) {
         this.controllerFactories = new Map();
@@ -50,12 +50,12 @@ export default class ControllerDispatcher {
      * @param req data associated with request.
      * @param res functionality for respoding to user.
      */
-    async dispatch(route: Route, req: ExpressRequest, res: ExpressResponse) {
+    async dispatch(route: Routing.Route, req: ExpressRequest, res: ExpressResponse) {
         if (!this.controllerFactories.has(route.controller)) {
             throw new Error(`Controller '${route.controller}' not found in controllers directory!`);
         }
 
-        const container: DIContainer = {};
+        const container: Routing.ContainerDI = {};
         const services = this.app.serviceManager.getServices();
 
         services.forEach((service, serviceKey) => {
@@ -107,7 +107,7 @@ export default class ControllerDispatcher {
 
         controllerFiles.forEach(controllerFile => {
             const controllerKey = this.resolveControllerKey(controllerFile);
-            const controllerFactory = (container: DIContainer) => {
+            const controllerFactory = (container: Routing.ContainerDI) => {
                 const controllerCls = require(controllerFile).default;
                 return new controllerCls(container);
             };

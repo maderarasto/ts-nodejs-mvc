@@ -1,22 +1,5 @@
-import { table } from "console";
-import DB, { ResultSetHeader, RowData } from "../database/DB";
+import DB from "../framework/Database/DB";
 import crypto from 'crypto';
-
-/**
- * Represent possible values for attributes.
- */
-export type AttributeValue = boolean | number | string | null;
-
-/**
- * Represents list of attributes of model.
- */
-export type ModelAttributes = {
-    [key: string]: AttributeValue
-}
-
-type ModelProperties = Object & {
-    [key: string]: string[]
-};
 
 /**
  * Represents possible options for decorating column properties of model.
@@ -38,7 +21,7 @@ export function useField(...args: FieldOption[]) {
                 get: function () {
                     return this.attributes[name];
                 },
-                set: function (value: AttributeValue) {
+                set: function (value: Database.Model.AttributeValue) {
                     if (value && args.includes('hashable')) {
                         value = crypto.createHash('md5').update(value as string).digest('hex');
                     }
@@ -75,7 +58,7 @@ export default class Model extends Object {
     /**
      * Contains data of record from table
      */
-    protected attributes: ModelAttributes = {};
+    protected attributes: Database.Model.Attributes = {};
 
     @useField()
     public id?: number;
@@ -94,7 +77,7 @@ export default class Model extends Object {
      * @param key {string} name of property
      * @param value {AttributeValue} value of property
      */
-    public setAttribute(key: string, value: AttributeValue) {
+    public setAttribute(key: string, value: Database.Model.AttributeValue) {
         const propertyDesc = Object.getOwnPropertyDescriptor(this, key);
 
         if (propertyDesc && propertyDesc.set) {
@@ -107,7 +90,7 @@ export default class Model extends Object {
      * 
      * @param data {ModelAttributes} represents new model parameters.
      */
-    public fill(data: ModelAttributes) {
+    public fill(data: Database.Model.Attributes) {
         const fillableFields = this.getFillableFields();
         
         Object.entries(data).forEach(([key, value]) => {
@@ -151,7 +134,7 @@ export default class Model extends Object {
             sql += `UPDATE \`${tableName}\` SET ${fields} WHERE \`id\` = ?`;
         }
         
-        const result = await DB.execute(sql, values) as ResultSetHeader;
+        const result = await DB.execute(sql, values) as Database.ResultHeader;
 
         if (result) {
             this.id = result.insertId
@@ -167,7 +150,7 @@ export default class Model extends Object {
      */
     public async destroy(): Promise<boolean> {
         const sql = `DELETE FROM ${this.getClass().getTableName()} WHERE i = ?`;
-        const result = await DB.execute(sql, [this.id as number]) as ResultSetHeader;
+        const result = await DB.execute(sql, [this.id as number]) as Database.ResultHeader;
 
         return result ? result.affectedRows > 0 : false;
     }
@@ -196,7 +179,7 @@ export default class Model extends Object {
             SELECT * FROM ${this.getTableName()}
             WHERE id = ?
             LIMIT 1
-        `, [id]) as RowData[];
+        `, [id]) as Database.RowData[];
 
         if (!result || result.length === 0) {
             return null;
@@ -219,7 +202,7 @@ export default class Model extends Object {
         const result = await DB.execute(`
             SELECT * FROM ${this.getTableName()}
             WHERE id IN (${ids.join(',')})
-        `) as RowData[];
+        `) as Database.RowData[];
 
         if (!result || result.length === 0) {
             return [];
@@ -245,7 +228,7 @@ export default class Model extends Object {
 
         const result = await DB.execute(`
             SELECT * FROM ${this.getTableName()}
-        `) as RowData[];
+        `) as Database.RowData[];
         
         if (!result || result.length === 0) {
             return [];
@@ -265,7 +248,7 @@ export default class Model extends Object {
      * @param data represents data of model
      * @returns promised created model
      */
-    public static async create(data: ModelAttributes): Promise<Model> {
+    public static async create(data: Database.Model.Attributes): Promise<Model> {
         if (this.name === Model.name) {
             throw new Error('A base model class cannot be querable!');
         }
@@ -291,7 +274,7 @@ export default class Model extends Object {
 
         const result = await DB.execute(
             `DELETE FROM ${this.getTableName()} WHERE id = ?`
-        , [id]) as ResultSetHeader;
+        , [id]) as Database.ResultHeader;
 
         if (!result) {
             return 0;
@@ -313,7 +296,7 @@ export default class Model extends Object {
 
         const result = await DB.execute(
             `DELETE FROM ${this.getTableName()} WHERE id IN (${ids.join(',')})`
-        ) as ResultSetHeader;
+        ) as Database.ResultHeader;
 
         if (!result) {
             return 0;
@@ -344,7 +327,7 @@ export default class Model extends Object {
      * @param data {RawData} represents record data in table.
      * @returns {Model} a new instance of model
      */
-    protected static instantiate(data: RowData): Model {
+    protected static instantiate(data: Database.RowData): Model {
         const model = new this();
         
         Object.keys(data).forEach((key: string) => {

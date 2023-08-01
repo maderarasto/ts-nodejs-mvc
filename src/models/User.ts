@@ -1,4 +1,4 @@
-import DB, { RowData } from "../database/DB";
+import DB from "../framework/Database/DB";
 import Model, { useField } from "./Model"
 
 /**
@@ -42,7 +42,7 @@ export default class User extends Model {
             SELECT * FROM users
             WHERE login = ?
             LIMIT 1
-        `, [login]) as RowData[];
+        `, [login]) as Database.RowData[];
 
         if (result.length === 0) {
             return null;

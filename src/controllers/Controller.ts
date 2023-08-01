@@ -3,29 +3,6 @@ import {
     Response as ExpressResponse, 
     CookieOptions 
 } from "express";
-import {Injectable} from '../interfaces';
-
-/**
- * Represents route of application that are binded to incoming requests.
- */
-export type Route = {
-    path: string,
-    name?: string,
-    method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
-    controller: string,
-    action: string,
-}
-
-/**
- * Represents error data as JSON response.
- */
-export type ErrorResponse = {
-    code: number,
-    error: {
-        message: string,
-        callstack?: string[]
-    }
-}
 
 /**
  * Represents a response wrapper around express response object with better error handling.
@@ -111,21 +88,14 @@ export class Response {
 }
 
 /**
- * Represents container for dependency injection.
- */
-export type ContainerDI = {
-    [key: string]: Injectable
-}
-
-/**
  * Represents a base controller that offers to access request data and functionality for responding to user.
  */
 export default abstract class Controller extends Object {
     private _response?: ExpressResponse;
     private _request?: ExpressRequest;
-    private _containerDI: ContainerDI;
+    private _containerDI: Routing.ContainerDI;
 
-    constructor(containerDI: ContainerDI = {}) {
+    constructor(containerDI: Routing.ContainerDI = {}) {
         super();
 
         this._containerDI = containerDI;
@@ -147,7 +117,7 @@ export default abstract class Controller extends Object {
         this._response = res;
     }
 
-    protected get containerDI(): ContainerDI {
+    protected get containerDI(): Routing.ContainerDI {
         return this._containerDI;
     }
 

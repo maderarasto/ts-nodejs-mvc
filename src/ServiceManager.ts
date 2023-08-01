@@ -2,7 +2,6 @@ import fs from 'fs';
 import path from "path";
 
 import config from "./config";
-import { Service } from './interfaces';
 import { FileSystem } from './utils';
 
 export default class ServiceManager extends Object {
@@ -20,7 +19,7 @@ export default class ServiceManager extends Object {
      * Factory methods for controllers binded by combination of folders and name.
      * Example of key Backend/UserController is located in controllers/Backend/UserController.ts.
      */
-    private serviceFactories: Map<string, () => Service>;
+    private serviceFactories: Map<string, () => Interfaces.Service>;
     
     constructor() {
         super();
@@ -35,7 +34,7 @@ export default class ServiceManager extends Object {
      * @param key key of service
      * @returns instance of service
      */
-    getService(key: string): Service {
+    getService(key: string): Interfaces.Service {
         if (!this.serviceFactories.has(key)) {
             throw new Error(`Service '${key}' not found in services directory!`);
         }
@@ -54,8 +53,8 @@ export default class ServiceManager extends Object {
      * Get instances of all services.
      * @returns instances of services
      */
-    getServices(): Map<string, Service> {
-        const services: Map<string, Service> = new Map();
+    getServices(): Map<string, Interfaces.Service> {
+        const services: Map<string, Interfaces.Service> = new Map();
 
         this.serviceFactories.forEach((serviceFactory, serviceKey) => {
             services.set(serviceKey, serviceFactory());

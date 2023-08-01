@@ -1,35 +1,10 @@
 import dotenv from 'dotenv';
-import { DatabaseCredentials } from "./database/DB";
-import { Route } from './controllers/Controller';
 import { getenv } from './utils';
 import path from 'path';
 
 dotenv.config();
 
-type AppConfig = {
-    name: string,
-    port: number,
-    rootDir: string,
-    srcDir: string
-    
-    database: {
-        credentials: DatabaseCredentials
-    },
-
-    session: {
-        driver: 'file' | 'database',
-        files: string,
-        secret: string,
-        lifetime: number,
-    },
-
-    /**
-     * List of registered routes that can be trigger using controllers
-     */
-    routes: Route[],
-};
-
-const config: AppConfig = {
+const config: Application.Config = {
     name: getenv('APP_NAME'),
     port: parseInt(getenv('APP_PORT', '3000')),
     rootDir: path.dirname(__dirname),

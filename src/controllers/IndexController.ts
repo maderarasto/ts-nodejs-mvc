@@ -1,10 +1,10 @@
-import {Controller, ContainerDI } from "./";
+import {Controller } from "./";
 import { AuthService } from '../services';
 
 export default class IndexController extends Controller {
     private authService: AuthService;
 
-    constructor(containerDI: ContainerDI) {
+    constructor(containerDI: Routing.ContainerDI) {
         super(containerDI);
 
         this.authService = containerDI.authService as AuthService;

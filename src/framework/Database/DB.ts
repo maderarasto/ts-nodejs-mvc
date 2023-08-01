@@ -1,29 +1,5 @@
-import mysql, {Pool, Connection, PoolConnection} from 'mysql2';
-import config from '../config';
-
-/**
- * Credentials required to connect to database.
- */
-export type DatabaseCredentials = {
-    host: string
-    user: string
-    password: string
-    database: string
-}
-
-/**
- * Raw data with properties based on record in DB table.
- */
-export type RowData = mysql.RowDataPacket;
-export type ResultSetHeader = mysql.ResultSetHeader;
-export type DbResult = (
-    mysql.RowDataPacket[] |
-    mysql.RowDataPacket[][] |
-    mysql.ResultSetHeader |
-    mysql.ResultSetHeader[]
-)
-
-type DatabaseParameter = (string | number | boolean | null);
+import mysql, {Pool, PoolConnection} from 'mysql2';
+import config from '../../config';
 
 /**
  * Provides functionality for executing SQL queries and using DB transactions.
@@ -88,11 +64,11 @@ export default class DB {
      * @param values optional values replacing ? in sql query
      * @returns promised result
      */
-    public static async execute(sql: string, values?: DatabaseParameter[]): Promise<DbResult> {
+    public static async execute(sql: string, values?: Database.Parameter[]): Promise<Database.Result> {
         const connection: PoolConnection = await DB.instance.connect();
         
         return new Promise((resolve, reject) => {
-            connection.execute(sql, values, (err, result: DbResult) => {
+            connection.execute(sql, values, (err, result: Database.Result) => {
                 if (err) {
                     reject(err);
                 } else {

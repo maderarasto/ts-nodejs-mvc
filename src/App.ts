@@ -7,26 +7,22 @@ import session, { Store } from 'express-session';
 import { Liquid } from 'liquidjs';
 import config from './config';
 
-import DB from './database/DB';
-import { Route } from './controllers/Controller';
+import DB from './framework/Database/DB';
 import { ErrorHandler } from './utils';
-import ControllerDispatcher from './ControllerDispatcher';
+import ControllerDispatcher from './framework/Core/ControllerDispatcher';
 import ServiceManager from './ServiceManager';
 
 /**
  * Represents data that can be stored in session.
  */
-declare module 'express-session' {
-    interface SessionData {
-        userId?: number
-    }
-}
+// declare module 'express-session' {
+//     interface SessionData {
+//         userId?: number
+//     }
+// }
 
 const FileStore = require('session-file-store')(session);
 const MySQLStore = require('express-mysql-session')(session);
-
-type SessionDriver = 'file' | 'database';
-type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 /**
  * Represents a container fo whole application and also it's entry point of application.
@@ -35,7 +31,7 @@ export default class App {
     /**
      * Session store factories based on driver in config.
      */
-    private static readonly SESSION_STORES: Record<SessionDriver, Store> = {
+    private static readonly SESSION_STORES: Record<Auth.Session.Driver, Store> = {
         file: new FileStore({
             path: config.session.files,
             //ttl: moment.duration(config.session.lifetime, 'minutes').asSeconds()
@@ -127,7 +123,7 @@ export default class App {
      * @param method type of http method
      * @returns callback for handling HTTP request
      */
-    private resolveExpressCallback(method: HttpMethod): Function {
+    private resolveExpressCallback(method: Routing.Method): Function {
         const callbackKey = method.toLowerCase() ?? '';
 
         if (!Reflect.has(this.app, callbackKey)) {
@@ -145,7 +141,7 @@ export default class App {
      * @param req associated data with request
      * @param res associated data with response
      */
-    private async handleRequest(route: Route, req: ExpressRequest, res: ExpressResponse) {
+    private async handleRequest(route: Routing.Route, req: ExpressRequest, res: ExpressResponse) {
         try {
             await this.controllerDispatcher.dispatch(route, req, res);
         } catch (err) {
