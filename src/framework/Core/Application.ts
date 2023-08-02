@@ -17,6 +17,7 @@ import ControllerDispatcher from '../Routing/ControllerDispatcher';
 import { ErrorHandler } from './ErrorHandler';
 import DB from '../Database/DB';
 import Defines from '../defines';
+import ServiceProvider from '../Providers/ServiceProvider';
 
 export default class Application {
     /**
@@ -25,13 +26,13 @@ export default class Application {
     private app: express.Express;
     
     private _config: Application.Config;
-    private _serviceManager: ServiceManager
+    private _serviceProvider: ServiceProvider;
     private _controllerDispatcher: ControllerDispatcher;
 
     constructor(config: Application.Config) {
         this.app = express();
         this._config = config;
-        this._serviceManager = new ServiceManager(this);
+        this._serviceProvider = new ServiceProvider(this);
         this._controllerDispatcher = new ControllerDispatcher(this);
 
         this.app.engine('liquid', new Liquid().express());
@@ -51,8 +52,8 @@ export default class Application {
         return this._config;
     }
 
-    get serviceManager() {
-        return this._serviceManager;
+    get serviceProvider() {
+        return this._serviceProvider;
     }
 
     /**

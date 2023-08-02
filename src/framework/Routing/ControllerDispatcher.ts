@@ -4,7 +4,7 @@ import Controller from "./Controller";
 import Dispatcher from "./Interfaces/Dispatcher";
 
 export default class ControllerDispatcher extends FactoryLoader<Controller> implements Dispatcher {
-    constructor(app: Application) {
+    constructor(private app: Application) {
         super('Controller', app.config.controllers.dir);
     }
     
@@ -14,6 +14,15 @@ export default class ControllerDispatcher extends FactoryLoader<Controller> impl
         }
 
         const container: Routing.ContainerDI = {};
+        const services = this.app.serviceProvider.all();
+
+        services.forEach((service, serviceKey) => {
+            const injectebleKey = serviceKey.split('/').reduce((carry, current, index) => {
+                const part = index === 0 ? current[0].toLowerCase() + current.substring(1) : current;
+                return carry + part;
+            }, '');
+            container[injectebleKey] = service;
+        });
 
         const controllerFactory = this.componentFactory.get(route.controller) as Function;
         const controller = controllerFactory(container);
