@@ -1,4 +1,5 @@
-import App from "./App";
+import config from "./config";
+import Application from "./framework/Core/Application";
 
-const app = new App;
+const app = new Application(config);
 app.start();

@@ -1,5 +1,6 @@
-import DB from "../framework/Database/DB";
-import Model, { useField } from "./Model"
+import DB from "../Database/DB";
+import Model from "../Database/Model"
+import { Field } from "../Database/Decorators/Field";
 
 /**
  * Represents a user in system.
@@ -15,22 +16,22 @@ export default class User extends Model {
         'phone'
     ];
 
-    @useField()
+    @Field()
     public first_name?: string;
 
-    @useField()
+    @Field()
     public last_name?: string;
 
-    @useField()
+    @Field()
     public login?: string;
 
-    @useField('hashable')
+    @Field('hashable')
     public password?: string;
 
-    @useField()
+    @Field()
     public email?: string;
 
-    @useField()
+    @Field()
     public phone?: string;
 
     constructor() {

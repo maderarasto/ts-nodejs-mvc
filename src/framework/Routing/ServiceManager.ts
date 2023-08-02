@@ -1,8 +1,7 @@
-import fs from 'fs';
 import path from "path";
 
-import config from "./config";
-import { FileSystem } from './utils';
+import Application from '../Core/Application';
+import FileSystem from "../Core/FileSystem";
 
 export default class ServiceManager extends Object {
     /**
@@ -13,7 +12,7 @@ export default class ServiceManager extends Object {
     /**
      * Directory in which are controller files located.
      */
-    private static readonly SERVICES_DIR = path.join(config.srcDir, 'services');
+    private static servicesDir: string;
     
     /**
      * Factory methods for controllers binded by combination of folders and name.
@@ -21,8 +20,10 @@ export default class ServiceManager extends Object {
      */
     private serviceFactories: Map<string, () => Interfaces.Service>;
     
-    constructor() {
+    constructor(private app: Application) {
         super();
+
+        ServiceManager.servicesDir = app.config.services.dir;
 
         this.serviceFactories = new Map();
         this.loadServices();
@@ -67,11 +68,11 @@ export default class ServiceManager extends Object {
      * Loads service factories from directory services.
      */
     private loadServices() {
-        if (!fs.existsSync(ServiceManager.SERVICES_DIR)) {
+        if (!FileSystem.exists(ServiceManager.servicesDir)) {
             return;
         }
 
-        const dirFiles = FileSystem.getFiles(ServiceManager.SERVICES_DIR, true);
+        const dirFiles = FileSystem.files(ServiceManager.servicesDir, true);
         const serviceFiles = dirFiles.filter(filePath => {
             const fileExt = path.extname(filePath);path
             const fileName = path.basename(filePath);
@@ -99,7 +100,7 @@ export default class ServiceManager extends Object {
      * @returns resolved controller key.
      */
     private resolveServiceKey(serviceFile: string) {
-        let serviceKey = serviceFile.replace(ServiceManager.SERVICES_DIR + path.sep, '');
+        let serviceKey = serviceFile.replace(ServiceManager.servicesDir + path.sep, '');
         serviceKey = serviceKey.replaceAll('\\', '/');
         serviceKey = serviceKey.replace('.ts', '');
 

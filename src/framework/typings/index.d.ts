@@ -2,24 +2,36 @@
 
 namespace Application {
     type Config = {
-        name: string,
-        port: number,
-        rootDir: string,
-        srcDir: string,
+        name: string
+        port: number
+        rootDir: string
+        srcDir: string
 
         database: {
             credentials: Database.Credentials
         },
 
         session: {
-            driver: Auth.Session.Driver,
-            files: string,
-            secret: string,
-            lifetime: number
-        },
+            driver: Auth.Session.Driver
+            files: string
+            secret: string
+            lifetime: numbe
+        }
 
         routes?: Routing.Route[]
-    }
+
+        views: {
+            dir: string
+        }
+
+        services: {
+            dir: string
+        }
+
+        controllers: {
+            dir: string
+        }
+    };
 }
 
 namespace Auth {

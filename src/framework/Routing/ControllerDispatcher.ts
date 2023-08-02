@@ -6,10 +6,9 @@ import {
     Response as ExpressResponse
 } from 'express';
 
-import Controller from "../../controllers/Controller";
-import { FileSystem } from '../../utils';
-import config from '../../config';
-import App from '../../App';
+import Application from '../Core/Application';
+import Controller from './Controller';
+import FileSystem from '../Core/FileSystem';
 
 /**
  * Represents a dispatcher for creating controllers and dispatching their action based on registered routes.
@@ -21,14 +20,9 @@ export default class ControllerDispatcher {
     private static readonly ABSTRACT_CONTROLLER_NAME = 'Controller';
 
     /**
-     * Extension of controller script files.
-     */
-    private static readonly CONTROLLERS_FILE_EXT = '.ts';
-
-    /**
      * Directory in which are controller files located.
      */
-    private static readonly CONTROLLERS_DIR = path.join(config.srcDir, 'controllers');
+    private static controllersDir: string;
 
     /**
      * Factory methods for controllers binded by combination of folders and name.
@@ -36,8 +30,9 @@ export default class ControllerDispatcher {
      */
     private controllerFactories: Map<string, (container: Routing.ContainerDI) => Controller>;
 
-    constructor(private app: App) {
+    constructor(private app: Application) {
         this.controllerFactories = new Map();
+        ControllerDispatcher.controllersDir = app.config.controllers.dir;
 
         this.loadControllers();
     }
@@ -91,18 +86,18 @@ export default class ControllerDispatcher {
      * Load all controllers from controllers directory and store their factory methods in map.
      */
     private loadControllers() {
-        if (!fs.existsSync(ControllerDispatcher.CONTROLLERS_DIR)) {
+        if (!fs.existsSync(ControllerDispatcher.controllersDir)) {
             return;
         }
 
-        const dirFiles = FileSystem.getFiles(ControllerDispatcher.CONTROLLERS_DIR, true);
+        const dirFiles = FileSystem.files(ControllerDispatcher.controllersDir, true);
         const controllerFiles = dirFiles.filter(filePath => {
             const fileExt = path.extname(filePath);
             const fileName = path.basename(filePath);
 
-            return fileExt === ControllerDispatcher.CONTROLLERS_FILE_EXT 
+            return fileExt === '.ts'
                 && fileName.includes(ControllerDispatcher.ABSTRACT_CONTROLLER_NAME) 
-                && fileName !== `${ControllerDispatcher.ABSTRACT_CONTROLLER_NAME}.${ControllerDispatcher.CONTROLLERS_FILE_EXT}`;
+                && fileName !== `${ControllerDispatcher.ABSTRACT_CONTROLLER_NAME}.ts`;
         });
 
         controllerFiles.forEach(controllerFile => {
@@ -123,9 +118,9 @@ export default class ControllerDispatcher {
      * @returns resolved controller key.
      */
     private resolveControllerKey(controllerFile: string) {
-        let controllerKey = controllerFile.replace(ControllerDispatcher.CONTROLLERS_DIR + path.sep, '');
+        let controllerKey = controllerFile.replace(ControllerDispatcher.controllersDir + path.sep, '');
         controllerKey = controllerKey.replaceAll('\\', '/');
-        controllerKey = controllerKey.replace(ControllerDispatcher.CONTROLLERS_FILE_EXT, '');
+        controllerKey = controllerKey.replace('.ts', '');
 
         return controllerKey;
     }

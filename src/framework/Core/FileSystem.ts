@@ -1,5 +1,7 @@
-import fs from 'fs';
+import fs, { Mode, PathLike } from 'fs';
 import path from 'path';
+
+type MakeDirectoryOptions = fs.MakeDirectoryOptions & { recursive: true};
 
 /**
  * Represents API for manipulating with filesystem.
@@ -7,6 +9,15 @@ import path from 'path';
 export default class FileSystem {
     private constructor() {
 
+    }
+
+    static exists(path: PathLike): boolean {
+        return fs.existsSync(path);
+    }
+
+    static isDirectory(path: PathLike): boolean {
+        const fileStat = fs.statSync(path);
+        return fileStat.isDirectory();
     }
 
     /**
@@ -17,29 +28,32 @@ export default class FileSystem {
      * @param recursive signal for recursive function for subdirectories.
      * @returns filepaths of found files.
      */
-    static getFiles(dir: string, recursive: boolean = false): string[] {
+    static files(dir: string, recursive: boolean = false): string[] {
         let dirFiles: string[] = [];
         const dirItems = fs.readdirSync(dir);
         
         dirItems.forEach(itemName => {
-            const itemPath = path.join(dir, itemName);
-            const itemStat = fs.statSync(itemPath);
-            //console.log(itemPath, dirFiles);
+            const filePath = path.join(dir, itemName);
 
-            if (itemStat.isDirectory()) {
+            if (FileSystem.isDirectory(filePath)) {
                 if (recursive) {
                     dirFiles = [
                         ...dirFiles, 
-                        ...FileSystem.getFiles(itemPath, recursive)
+                        ...FileSystem.files(filePath, recursive)
                     ];
                 } 
 
                 return;
             }
 
-            dirFiles.push(itemPath);
+            dirFiles.push(filePath);
         });
 
         return dirFiles;
     }
+
+    static makeDirectory(path: PathLike, options?: fs.Mode | fs.MakeDirectoryOptions | null) {
+        return fs.mkdirSync(path, options);
+    }
+
 }

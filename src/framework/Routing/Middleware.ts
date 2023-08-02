@@ -3,15 +3,10 @@ import {
     Response as ExpressResponse
 } from 'express'
 
-import App from "../App";
+import App from "../Core/Application";
 
-export type MiddlewareClass = {
-    new (app: App): Middleware
-}
-
-export default abstract class Middleware extends Object {
+export default abstract class Middleware {
     constructor(private app: App) {
-        super();
     }
 
     abstract handle(req: ExpressRequest, res: ExpressResponse): boolean;

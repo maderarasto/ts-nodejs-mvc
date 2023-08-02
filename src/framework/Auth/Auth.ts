@@ -1,7 +1,7 @@
-import User from "../models/User";
 import crypto from 'crypto';
+import User from './User';
 
-export default class AuthService implements Interfaces.Service {
+export default class Auth {
     isAuthenticated(session: Auth.Session): boolean {
         return session.userId !== undefined;
     }

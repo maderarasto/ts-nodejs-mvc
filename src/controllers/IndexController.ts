@@ -1,13 +1,8 @@
-import {Controller } from "./";
-import { AuthService } from '../services';
+import Controller from '../framework/Routing/Controller';
 
 export default class IndexController extends Controller {
-    private authService: AuthService;
-
     constructor(containerDI: Routing.ContainerDI) {
         super(containerDI);
-
-        this.authService = containerDI.authService as AuthService;
     }
 
     async index() {

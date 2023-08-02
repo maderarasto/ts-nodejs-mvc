@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
-import { getenv } from './utils';
 import path from 'path';
+
+import { getenv } from './framework/Core';
 
 dotenv.config();
 
@@ -42,6 +43,18 @@ const config: Application.Config = {
             'index'
         },
     ],
-}
+
+    services: {
+        dir: path.join(__dirname, 'services')
+    },
+
+    controllers: {
+        dir: path.join(__dirname, 'controllers')
+    },
+
+    views: {
+        dir: path.join(__dirname, 'views')
+    }
+};
 
 export default config;
