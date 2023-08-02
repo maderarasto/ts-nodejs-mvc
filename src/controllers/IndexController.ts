@@ -7,7 +7,7 @@ export default class IndexController extends Controller {
 
     async index() {
         this.response.render('home', {
-            userId: this.request.session.userId
+            userId: 0
         });
     }
 }
