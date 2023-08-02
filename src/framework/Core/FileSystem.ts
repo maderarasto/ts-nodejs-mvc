@@ -1,7 +1,5 @@
-import fs, { Mode, PathLike } from 'fs';
+import fs from 'fs';
 import path from 'path';
-
-type MakeDirectoryOptions = fs.MakeDirectoryOptions & { recursive: true};
 
 /**
  * Represents API for manipulating with filesystem.
@@ -11,13 +9,26 @@ export default class FileSystem {
 
     }
 
-    static exists(path: PathLike): boolean {
-        return fs.existsSync(path);
+    static exists(filePath: string): boolean {
+        return fs.existsSync(filePath);
     }
 
-    static isDirectory(path: PathLike): boolean {
-        const fileStat = fs.statSync(path);
+    static isFile(filePath: string): boolean {
+        const fileStat = fs.statSync(filePath);
+        return fileStat.isFile();
+    }
+
+    static isDirectory(filePath: string): boolean {
+        const fileStat = fs.statSync(filePath);
         return fileStat.isDirectory();
+    }
+
+    static basename(filePath: string): string {
+        return path.basename(filePath);
+    }
+
+    static extension(filePath: string): string {
+        return path.extname(filePath);
     }
 
     /**
@@ -52,8 +63,8 @@ export default class FileSystem {
         return dirFiles;
     }
 
-    static makeDirectory(path: PathLike, options?: fs.Mode | fs.MakeDirectoryOptions | null) {
-        return fs.mkdirSync(path, options);
+    static makeDirectory(dir: string, options?: fs.Mode | fs.MakeDirectoryOptions | null) {
+        return fs.mkdirSync(dir, options);
     }
 
 }
