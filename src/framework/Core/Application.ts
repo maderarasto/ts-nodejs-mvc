@@ -45,7 +45,7 @@ export default class Application {
             session({
                 store: this._sessionStoreProvider.get(config.session.driver),
                 secret: config.session.secret,
-                saveUninitialized: false,
+                saveUninitialized: true,
                 resave: false
             })
         );

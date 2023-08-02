@@ -4,8 +4,6 @@ namespace Application {
     type Config = {
         name: string
         port: number
-        rootDir: string
-        srcDir: string
 
         database: {
             credentials: Database.Credentials

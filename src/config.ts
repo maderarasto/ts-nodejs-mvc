@@ -8,8 +8,6 @@ dotenv.config();
 const config: Application.Config = {
     name: getenv('APP_NAME'),
     port: parseInt(getenv('APP_PORT', '3000')),
-    rootDir: path.dirname(__dirname),
-    srcDir: __dirname,
 
     database: {
         credentials: {
