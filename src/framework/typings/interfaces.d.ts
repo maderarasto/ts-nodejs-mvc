@@ -1,5 +1,12 @@
 declare namespace Interfaces {
     /**
+     * Represetns component that can automatically be loaded by factory loader.
+     */
+    export interface Loadable {
+
+    }
+
+    /**
      * Represents component that can be injected to controllers
      */
     export interface Injectable {

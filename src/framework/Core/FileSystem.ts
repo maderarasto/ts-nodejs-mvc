@@ -5,6 +5,8 @@ import path from 'path';
  * Represents API for manipulating with filesystem.
  */
 export default class FileSystem {
+    static readonly sep = path.sep;
+
     private constructor() {
 
     }
