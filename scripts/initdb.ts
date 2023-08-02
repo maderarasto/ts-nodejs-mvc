@@ -1,4 +1,4 @@
-import DB from '../framework/Database/DB';
+import DB from '../src/framework/Database/DB';
 
 async function init() {
     await DB.execute(`

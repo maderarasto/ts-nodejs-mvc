@@ -16,6 +16,7 @@ import ServiceManager from '../Routing/ServiceManager';
 import ControllerDispatcher from '../Routing/ControllerDispatcher';
 import { ErrorHandler } from './ErrorHandler';
 import DB from '../Database/DB';
+import Defines from '../defines';
 
 export default class Application {
     /**
@@ -36,11 +37,14 @@ export default class Application {
         this.app.engine('liquid', new Liquid().express());
         this.app.set('views', [
             config.views.dir,
-            path.join(config.srcDir, 'framework/View')
+            path.join(Defines.SRC_DIR, 'framework/View'),
+            path.join(Defines.SRC_DIR, 'framework/View/Errors')
         ]);
         this.app.set('view engine', 'liquid');
 
         // TODO: initialize session
+
+        console.log(Defines.SRC_DIR);
     }
 
     get config() {
@@ -58,8 +62,10 @@ export default class Application {
         DB.init();
         
         if (this.config.session.driver === 'file') {
-            if (!FileSystem.exists(path.join(__dirname, 'storage/sessions'))) {
-                FileSystem.makeDirectory(path.join(__dirname, 'storage/sessions'));
+            if (!FileSystem.exists(path.join(Defines.SRC_DIR, 'storage/sessions'))) {
+                FileSystem.makeDirectory(path.join(Defines.SRC_DIR, 'storage/sessions'), { 
+                    recursive: true 
+                });
             }
         }
 
