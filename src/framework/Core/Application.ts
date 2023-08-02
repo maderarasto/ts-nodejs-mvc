@@ -7,17 +7,13 @@ import express, {
     Response as ExpressResponse 
 } from 'express';
 
-import FileSystem from './FileSystem';
-
-const FileStore = require('session-file-store')(session);
-const MySQLStore = require('express-mysql-session')(session);
-
-import ServiceManager from '../Routing/ServiceManager';
-import ControllerDispatcher from '../Routing/ControllerDispatcher';
-import { ErrorHandler } from './ErrorHandler';
-import DB from '../Database/DB';
-import Defines from '../defines';
+import SessionStoreProvider from '../Auth/Providers/SessionStoreProvider';
 import ServiceProvider from '../Providers/ServiceProvider';
+import ControllerDispatcher from '../Routing/ControllerDispatcher';
+import FileSystem from './FileSystem';
+import { ErrorHandler } from './ErrorHandler';
+import Defines from '../defines';
+import DB from '../Database/DB';
 
 export default class Application {
     /**
@@ -26,24 +22,33 @@ export default class Application {
     private app: express.Express;
     
     private _config: Application.Config;
+    private _sessionStoreProvider: SessionStoreProvider;
     private _serviceProvider: ServiceProvider;
     private _controllerDispatcher: ControllerDispatcher;
 
     constructor(config: Application.Config) {
         this.app = express();
         this._config = config;
+        this._sessionStoreProvider = new SessionStoreProvider(this);
         this._serviceProvider = new ServiceProvider(this);
         this._controllerDispatcher = new ControllerDispatcher(this);
 
         this.app.engine('liquid', new Liquid().express());
+        this.app.set('view engine', 'liquid');
         this.app.set('views', [
             config.views.dir,
             path.join(Defines.SRC_DIR, 'framework/View'),
             path.join(Defines.SRC_DIR, 'framework/View/Errors')
         ]);
-        this.app.set('view engine', 'liquid');
-
-        // TODO: initialize session
+        
+        this.app.use(
+            session({
+                store: this._sessionStoreProvider.get(config.session.driver),
+                secret: config.session.secret,
+                saveUninitialized: false,
+                resave: false
+            })
+        );
 
         console.log(Defines.SRC_DIR);
     }
