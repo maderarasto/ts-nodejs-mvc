@@ -4,16 +4,21 @@ export default interface Guard {
     /**
      * Check if user was already authentificated.
      */
-    check(): boolean
+    check(): Promise<boolean>
 
     /**
      * Get an authentificated user.
      */
-    getUser(): Promise<User|undefined>
+    getUser(): Promise<User|null>
 
     /**
      * Checks if given credentials are valid.
      * @param credentials 
      */
     validate(credentials: Auth.Credentials): Promise<boolean>
+
+    /**
+     * Forget authentificaiton of user.
+     */
+    forgetUser(): Promise<void>
 }

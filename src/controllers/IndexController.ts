@@ -6,6 +6,9 @@ export default class IndexController extends Controller {
     }
 
     async index() {
+        console.log(this.request.session.userId);
+        console.log(await this.auth?.isAuthenticated());
+
         this.response.render('home', {
             userId: 0
         });

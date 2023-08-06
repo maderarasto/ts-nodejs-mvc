@@ -1,4 +1,3 @@
-import { Request as ExpressRequest } from 'express';
 import crypto from 'crypto';
 
 import Guard from "./Interfaces/Guard";
@@ -6,26 +5,28 @@ import User from "./User";
 
 export default class SessionGuard implements Guard {
     private _user?: User;
-    private _session: Auth.Session;
 
-    constructor(request: ExpressRequest) {
-        this._session = request.session;
+    constructor(private session: Auth.Session) {
     }
 
-    check(): boolean {
+    async check(): Promise<boolean> {
+        if (this.session.userId) {
+            this._user = await User.find(this.session.userId) as User;
+        }
+
         return !!this._user;
     }
 
-    async getUser(): Promise<User|undefined> {
+    async getUser(): Promise<User|null> {
         if (this._user) {
             return this._user;
         }
 
-        if (this._session.userId) {
-            this._user = await User.find(this._session.userId) as User;
+        if (this.session.userId) {
+            this._user = await User.find(this.session.userId) as User;
         }
 
-        return this._user;
+        return this._user ?? null;
     }
 
     async validate(credentials: Auth.Credentials): Promise<boolean> {
@@ -40,13 +41,26 @@ export default class SessionGuard implements Guard {
         }
 
         // Store auth data after successful validation
-        this._session.userId = user.id;
+        this.session.userId = user.id;
 
         return true;
     }
 
+    async forgetUser(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.session.destroy(err => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+
+                this._user = undefined;
+            })
+        })    
+    }
+
     private comparePassword(password: string): boolean {
-        return this._user?.password !== crypto.createHash('md5').update(password).digest('hex') ?? false;
+        return this._user?.password === crypto.createHash('md5').update(password).digest('hex') ?? false;
     }
 
 }

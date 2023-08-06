@@ -4,18 +4,18 @@ import {
 } from "express";
 
 import Response from "./Response";
+import Authentificator from "../Auth/Authenticator";
 
 /**
  * Represents a base controller that offers to access request data and functionality for responding to user.
  */
-export default abstract class Controller extends Object {
+export default abstract class Controller {
     private _response?: ExpressResponse;
     private _request?: ExpressRequest;
+    private _auth?: Authentificator;
     private _containerDI: Routing.ContainerDI;
 
     constructor(containerDI: Routing.ContainerDI = {}) {
-        super();
-
         this._containerDI = containerDI;
     }
 
@@ -25,6 +25,7 @@ export default abstract class Controller extends Object {
      */
     setRequest(req: ExpressRequest) {
         this._request = req;
+        this._auth = new Authentificator(req);
     }
 
     /**
@@ -51,5 +52,9 @@ export default abstract class Controller extends Object {
      */
     protected get response(): Response {
         return new Response(this._response as ExpressResponse);
+    }
+
+    protected get auth(): Authentificator|undefined {
+        return this._auth;
     }
 }
