@@ -2,7 +2,9 @@ import Application from "../Core/Application";
 import FactoryLoader from "../Core/FactoryLoader";
 import Provider from "../Core/Interfaces/Provider";
 
-export default class ServiceProvider extends FactoryLoader<Interfaces.Service> implements Provider<string, Interfaces.Service> {
+export default class ServiceProvider 
+    extends FactoryLoader<Interfaces.Service> 
+    implements Provider<string, Interfaces.Service> {
 
     constructor(app: Application) {
         super('Service', app.config.services.dir);

@@ -3,12 +3,19 @@ import crypto from 'crypto';
 import Guard from "./Interfaces/Guard";
 import User from "./User";
 
+/**
+ * Represents autentication guard that uses sessions.
+ */
 export default class SessionGuard implements Guard {
     private _user?: User;
 
     constructor(private session: Auth.Session) {
     }
 
+    /**
+     * Check if user was authenticated for current session.
+     * @returns promise of check result.
+     */
     async check(): Promise<boolean> {
         if (this.session.userId) {
             this._user = await User.find(this.session.userId) as User;
@@ -17,6 +24,10 @@ export default class SessionGuard implements Guard {
         return !!this._user;
     }
 
+    /**
+     * Get an authenticated user through session.
+     * @returns promise of authenticated user.
+     */
     async getUser(): Promise<User|null> {
         if (this._user) {
             return this._user;
@@ -29,6 +40,12 @@ export default class SessionGuard implements Guard {
         return this._user ?? null;
     }
 
+    /**
+     * Validate user credentials. If they are valid then it sets authenticated user.
+     * 
+     * @param credentials credentials of user.
+     * @returns promise of validation result.
+     */
     async validate(credentials: Auth.Credentials): Promise<boolean> {
         const user = await User.findByLogin(credentials.login);
 
@@ -46,6 +63,10 @@ export default class SessionGuard implements Guard {
         return true;
     }
 
+    /**
+     * Forget authenticated user and destroying session.
+     * @returns 
+     */
     async forgetUser(): Promise<void> {
         return new Promise((resolve, reject) => {
             this.session.destroy(err => {
@@ -59,6 +80,11 @@ export default class SessionGuard implements Guard {
         })    
     }
 
+    /**
+     * Compare hash value of given password with password of current user.
+     * @param password password
+     * @returns result of comparing.
+     */
     private comparePassword(password: string): boolean {
         return this._user?.password === crypto.createHash('md5').update(password).digest('hex') ?? false;
     }

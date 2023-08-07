@@ -38,6 +38,12 @@ export default class User extends Model {
         super();
     }
 
+    /**
+     * Find user by unique login.
+     * 
+     * @param login login
+     * @returns promised user or null.
+     */
     public static async findByLogin(login: string): Promise<User | null> {
         const result = await DB.execute(`
             SELECT * FROM users

@@ -6,7 +6,9 @@ import Provider from "../../Core/Interfaces/Provider";
 
 const FileStore = require('session-file-store')(session);
 const MySQLStore = require('express-mysql-session')(session);
-
+/**
+ * Provide a instance for session store register by driver.
+ */
 export default class SessionStoreProvider implements Provider<Auth.Session.Driver, Store> {
     private storeFactory: Map<Auth.Session.Driver, Store>;
 
@@ -33,6 +35,11 @@ export default class SessionStoreProvider implements Provider<Auth.Session.Drive
         ]);
     }
 
+    /**
+     * Get an instance of session store by given session driver key.
+     * @param key key of session driver
+     * @returns instance of session store.
+     */
     get(key: Auth.Session.Driver): Store {
         if (!this.storeFactory.has(key)) {
             throw new Error(`Session store with driver '${key}' not found !`);
@@ -41,6 +48,10 @@ export default class SessionStoreProvider implements Provider<Auth.Session.Drive
         return this.storeFactory.get(key) as Store;
     }
 
+    /**
+     * Get map of instances of session stores binded with session driver keys.
+     * @returns map of session stores.
+     */
     all(): Map<Auth.Session.Driver, Store> {
         const stores: Map<Auth.Session.Driver, Store> = new Map();
 

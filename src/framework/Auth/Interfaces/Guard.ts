@@ -1,5 +1,8 @@
 import User from "../User";
 
+/**
+ * Represents a guard that can validate user credentials and access to authenticated user.
+ */
 export default interface Guard {
     /**
      * Check if user was already authentificated.
