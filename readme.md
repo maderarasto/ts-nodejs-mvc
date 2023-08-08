@@ -289,8 +289,68 @@ In `request` proeprty you can find information about processed request such as u
 ###### Response
 With `response` property you can manipulate what can be send in response. You can set up headers, cookies, content and subsequently send response with status code.
 If you are using render engine you can also render template view by using method `render`.
+### Authentification
+If you want to authenticate user you can use `Authenticator` that can be accessed from each controller instance through property `this.auth`. Using authenticator you can login and logout user, get authenticated user or checked if he was already authenticated.
+#### Authenticate user
+```typescript
+import Controller, {ContainerDI} from './Controller';
+
+export default class UserController extends Controller {
+    ...
+    async index() {
+        await this.auth.login({
+            login: '<USER LOGIN>',
+            password: '<USER PASWORD>'
+        });
+        ...
+    }
+}
+```
+
+#### Check if user is authenticated
+```typescript
+import Controller, {ContainerDI} from './Controller';
+
+export default class UserController extends Controller {
+    ...
+    async index() {
+        if (await this.auth.isAuthenticated()) {
+            // some auth logic
+        }
+        ...
+    }
+}
+```
+
+#### Get authenticated user
+```typescript
+import Controller, {ContainerDI} from './Controller';
+
+export default class UserController extends Controller {
+    ...
+    async index() {
+        const user = await this.auth.getUser();
+        ...
+    }
+}
+```
+
+#### Logout user
+```typescript
+import Controller, {ContainerDI} from './Controller';
+
+export default class UserController extends Controller {
+    ...
+    async index() {
+        await this.auth.logout();
+        ...
+    }
+}
+```
+
 ### Services
-Your business logic shouldn't be used directly in controllers so you could create your own services and then using them in your controllers.
+Your business logic shouldn't be used directly in controllers so you could create your own services and then using them in your controllers. 
+
 #### Creating your service
 First you need to create your service class in `services` folder that will be implmenting `interface Service` with some methods that can be ran in your controller.
 ```typescript
